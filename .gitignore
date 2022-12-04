@@ -4,4 +4,6 @@ Testing/
 .ninja_log
 .qtc_clangd/
 .rcc/
-CMakeCache.txt
+CMakeCache*
+CMakeFiles/
+build.ninja
