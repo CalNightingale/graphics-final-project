@@ -1,0 +1,7 @@
+Testing/
+.cmake/
+.ninja_deps
+.ninja_log
+.qtc_clangd/
+.rcc/
+CMakeCache.txt
