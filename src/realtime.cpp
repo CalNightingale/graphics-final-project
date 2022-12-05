@@ -314,6 +314,11 @@ Shape genShapeFromBlock(const Block &block) {
     case Stone:
         diff = SceneColor{0.43,0.43,0.43,1};
         break;
+    case Snow:
+        diff = SceneColor{1,1,1,1};
+        break;
+    case Water:
+        diff = SceneColor{0,0,1,1};
     }
 
     SceneMaterial mat = SceneMaterial{blockAmbient, diff, blockSpecular, blockShininess};
@@ -371,7 +376,6 @@ void Realtime::renderShape(Shape shape, GLint ambLoc, GLint diffLoc, GLint specL
     glUniform4fv(specLoc, 1, &shape.data.primitive.material.cSpecular[0]);
     glUniform1f(shineLoc, shape.data.primitive.material.shininess);
 
-
     // set vbo data to current shape
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*shape.vertexData.size(), shape.vertexData.data(), GL_STATIC_DRAW);
     // draw shape
@@ -399,9 +403,12 @@ void Realtime::computeBlockShapeData() {
 }
 
 void Realtime::genTestBlockData() {
+    m_blockData.clear();
     m_blockData.push_back(Block{glm::vec3(0,0,0), Grass});
     m_blockData.push_back(Block{glm::vec3(1,0,0), Stone});
     m_blockData.push_back(Block{glm::vec3(0,0,1), Dirt});
+    m_blockData.push_back(Block{glm::vec3(0,1,1), Snow});
+    m_blockData.push_back(Block{glm::vec3(1,-1,1), Water});
 
 }
 
