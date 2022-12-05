@@ -303,10 +303,20 @@ Shape genShapeFromBlock(const Block &block) {
     //      also has std::string meshfile but we don't use this
     // SceneMaterial has: ambient, diffuse, spec vec4s, shininess float, and other stuff we don't need
     // generate RenderShapeData
-    SceneColor amb = SceneColor{0.5,0,0.5,1};
+    SceneColor amb = SceneColor{0.5,0.5,0.5,1};
     SceneColor diff = SceneColor{1,1,0,1};
-    SceneColor spec = SceneColor{1,1,1,1};
-    float shine = 30;
+    switch (block.type) {
+    case Grass:
+        diff = SceneColor{1,1,0,1};
+        break;
+    case Dirt:
+        diff = SceneColor{0.54,0.34,0.18,1};
+        break;
+    case Stone:
+        diff = SceneColor{0.43,0.43,0.43,1};
+        break;
+    }
+
     SceneMaterial mat = SceneMaterial{amb, diff, blockSpecular, blockShininess};
     ScenePrimitive prim = ScenePrimitive{PrimitiveType::PRIMITIVE_CUBE, mat};
     // compute ctm: blocks in this world are all unit sized, simply have to be translated to proper location
