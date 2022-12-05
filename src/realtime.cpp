@@ -284,6 +284,36 @@ void Realtime::paintGeometry() {
     glUseProgram(0);
 }
 
+/**
+ * @brief genShapeFromBlock
+ * @param block
+ * @return Shape object to render
+ */
+Shape genShapeFromBlock(const Block &block) {
+
+}
+
+void Realtime::paintBlocks() {
+    glUseProgram(m_phong_shader);
+
+    // initialize shader
+    auto [ambLoc, diffLoc, specLoc, shineLoc] = initializeShader();
+
+    // bind vbo
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBindVertexArray(m_vao);
+    // iterate through each shape in the scene and render it
+    for (const Block &b : m_blockData) {
+        Shape s = genShapeFromBlock(b);
+        renderShape(s, ambLoc, diffLoc, specLoc, shineLoc);
+    }
+
+    // Unbind
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glUseProgram(0);
+}
+
 // Modified from lab 11
 void Realtime::paintTexture(GLuint texture, bool pixelFilter, bool kernelFilter){
     glUseProgram(m_tex_shader);
@@ -350,9 +380,9 @@ void Realtime::resizeGL(int w, int h) {
  * @brief Realtime::computeSceneShapeData iterate through the shapes in the scene and compute their vertex data.
  * Store both information about their shape primitive and vertex data in m_shapeData, as both are needed for rendering
  */
-void Realtime::computeSceneShapeData() {
+void Realtime::computeSceneShapeData(const std::vector<RenderShapeData> &shapes) {
     m_shapeData.clear();
-    for (const RenderShapeData &shape : m_sceneData.shapes) {
+    for (const RenderShapeData &shape : shapes) {
         std::vector<float> curVertexData;
         switch(shape.primitive.type) {
         case PrimitiveType::PRIMITIVE_SPHERE: {
@@ -385,13 +415,13 @@ void Realtime::computeSceneShapeData() {
 void Realtime::sceneChanged() {
     SceneParser::parse(settings.sceneFilePath, m_sceneData);
     rebuildMatrices();
-    computeSceneShapeData();
+    computeSceneShapeData(m_sceneData.shapes);
     update(); // asks for a PaintGL() call to occur
 }
 
 void Realtime::settingsChanged() {
     rebuildMatrices();
-    computeSceneShapeData();
+    computeSceneShapeData(m_sceneData.shapes);
     update(); // asks for a PaintGL() call to occur
 }
 

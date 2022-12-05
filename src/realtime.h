@@ -2,6 +2,7 @@
 
 // Defined before including GLEW to suppress deprecation messages on macOS
 #include "shapes/Shape.h"
+#include "block.h"
 #include "utils/sceneparser.h"
 #ifdef __APPLE__
 #define GL_SILENCE_DEPRECATION
@@ -41,7 +42,7 @@ private:
     void mouseMoveEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
     void rebuildMatrices();
-    void computeSceneShapeData();
+    void computeSceneShapeData(const std::vector<RenderShapeData> &shapes);
     std::tuple<GLint, GLint, GLint, GLint> initializeShader();
     void renderShape(Shape shape, GLint ambLoc, GLint diffLoc, GLint specLoc, GLint shineLoc);
 
@@ -81,4 +82,8 @@ private:
     void makeFBO();
     void paintTexture(GLuint texture, bool pixelFilter, bool kernelFilter);
     void paintGeometry();
+
+    // FINAL PROJECT STUFF
+    void paintBlocks();
+    std::vector<Block> m_blockData;
 };
