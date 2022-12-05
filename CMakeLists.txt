@@ -49,6 +49,7 @@ add_executable(${PROJECT_NAME}
     src/shapes/cube.h
     src/shapes/cylinder.h
     src/shapes/Shape.h
+    src/block.h
     src/debug.h
 )
 

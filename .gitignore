@@ -7,3 +7,6 @@ Testing/
 CMakeCache*
 CMakeFiles/
 build.ninja
+StaticGLEW_autogen/
+graphics-final*
+qtcsettings.cmake
