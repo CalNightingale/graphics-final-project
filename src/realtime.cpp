@@ -307,7 +307,7 @@ Shape genShapeFromBlock(const Block &block) {
     SceneColor diff = SceneColor{1,1,0,1};
     SceneColor spec = SceneColor{1,1,1,1};
     float shine = 30;
-    SceneMaterial mat = SceneMaterial{amb, diff, spec, shine};
+    SceneMaterial mat = SceneMaterial{amb, diff, blockSpecular, blockShininess};
     ScenePrimitive prim = ScenePrimitive{PrimitiveType::PRIMITIVE_CUBE, mat};
     // compute ctm: blocks in this world are all unit sized, simply have to be translated to proper location
     glm::mat4 ctm = Cube::getTranslationMatrix(block.pos.x, block.pos.y, block.pos.z);
