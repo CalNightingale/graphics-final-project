@@ -52,7 +52,7 @@ glm::mat4 getRotationMatrixZ(float angle) {
                      0, 0, 0, 1);
 }
 
-glm::mat4 getTranslationMatrix(float dx, float dy, float dz) {
+glm::mat4 Cube::getTranslationMatrix(float dx, float dy, float dz) {
     // Task 3: return the matrix for translation
     glm::mat4 translate = glm::mat4(1.f);
     translate[3][0] = dx;

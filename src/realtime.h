@@ -84,6 +84,7 @@ private:
     void paintGeometry();
 
     // FINAL PROJECT STUFF
-    void paintBlocks();
     std::vector<Block> m_blockData;
+    void computeBlockShapeData();
+    void genTestBlockData();
 };

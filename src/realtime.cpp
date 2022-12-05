@@ -285,33 +285,32 @@ void Realtime::paintGeometry() {
 }
 
 /**
- * @brief genShapeFromBlock
+ * @brief genShapeFromBlock converts block data into Shape data which can be rendered
  * @param block
  * @return Shape object to render
  */
 Shape genShapeFromBlock(const Block &block) {
+    // Shape has 2 parts: RenderShapeData data and std::vector<float> vertexData
+    // RenderShapeData has 2 parts: ScenePrimitive primitive and glm::mat4 ctm
+    // ScenePrimitive has 2 parts: PrimitiveType type and SceneMaterial material
+    //      also has std::string meshfile but we don't use this
+    // SceneMaterial has: ambient, diffuse, spec vec4s, shininess float, and other stuff we don't need
+    // generate RenderShapeData
+    SceneColor amb = SceneColor{0.5,0,0.5,1};
+    SceneColor diff = SceneColor{1,1,0,1};
+    SceneColor spec = SceneColor{1,1,1,1};
+    float shine = 30;
+    SceneMaterial mat = SceneMaterial{amb, diff, spec, shine};
+    ScenePrimitive prim = ScenePrimitive{PrimitiveType::PRIMITIVE_CUBE, mat};
+    // compute ctm: blocks in this world are all unit sized, simply have to be translated to proper location
+    glm::mat4 ctm = Cube::getTranslationMatrix(block.pos.x, block.pos.y, block.pos.z);
+    RenderShapeData rsd = RenderShapeData{prim, ctm};
+    // generate vertexData
+    Cube cube;
+    cube.updateParams(2, rsd); // IGNORE SETTINGS; USE MINIMAL TESELLATION (its a cube - no difference)
+    std::vector<float> vertexData = cube.generateShape();
 
-}
-
-void Realtime::paintBlocks() {
-    glUseProgram(m_phong_shader);
-
-    // initialize shader
-    auto [ambLoc, diffLoc, specLoc, shineLoc] = initializeShader();
-
-    // bind vbo
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glBindVertexArray(m_vao);
-    // iterate through each shape in the scene and render it
-    for (const Block &b : m_blockData) {
-        Shape s = genShapeFromBlock(b);
-        renderShape(s, ambLoc, diffLoc, specLoc, shineLoc);
-    }
-
-    // Unbind
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glUseProgram(0);
+    return Shape{rsd, vertexData};
 }
 
 // Modified from lab 11
@@ -412,10 +411,23 @@ void Realtime::computeSceneShapeData(const std::vector<RenderShapeData> &shapes)
     }
 }
 
+void Realtime::computeBlockShapeData() {
+    m_shapeData.clear();
+    for (const Block &block : m_blockData) {
+        m_shapeData.push_back(genShapeFromBlock(block));
+    }
+}
+
+void Realtime::genTestBlockData() {
+    m_blockData.push_back(Block{glm::vec3(0,0,0), Grass});
+}
+
 void Realtime::sceneChanged() {
     SceneParser::parse(settings.sceneFilePath, m_sceneData);
     rebuildMatrices();
-    computeSceneShapeData(m_sceneData.shapes);
+    //computeSceneShapeData(m_sceneData.shapes);
+    genTestBlockData();
+    computeBlockShapeData();
     update(); // asks for a PaintGL() call to occur
 }
 

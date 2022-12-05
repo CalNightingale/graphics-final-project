@@ -9,6 +9,7 @@ class Cube
 public:
     void updateParams(int param1, RenderShapeData shape);
     std::vector<float> generateShape() { return m_vertexData; }
+    static glm::mat4 getTranslationMatrix(float dx, float dy, float dz);
 
 private:
     void insertVec3(std::vector<float> &data, glm::vec3 v, bool isPos);
