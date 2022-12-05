@@ -303,7 +303,6 @@ Shape genShapeFromBlock(const Block &block) {
     //      also has std::string meshfile but we don't use this
     // SceneMaterial has: ambient, diffuse, spec vec4s, shininess float, and other stuff we don't need
     // generate RenderShapeData
-    SceneColor amb = SceneColor{0.5,0.5,0.5,1};
     SceneColor diff = SceneColor{1,1,0,1};
     switch (block.type) {
     case Grass:
@@ -317,7 +316,7 @@ Shape genShapeFromBlock(const Block &block) {
         break;
     }
 
-    SceneMaterial mat = SceneMaterial{amb, diff, blockSpecular, blockShininess};
+    SceneMaterial mat = SceneMaterial{blockAmbient, diff, blockSpecular, blockShininess};
     ScenePrimitive prim = ScenePrimitive{PrimitiveType::PRIMITIVE_CUBE, mat};
     // compute ctm: blocks in this world are all unit sized, simply have to be translated to proper location
     glm::mat4 ctm = Cube::getTranslationMatrix(block.pos.x, block.pos.y, block.pos.z);
@@ -420,9 +419,9 @@ void Realtime::populateSceneData() {
     m_sceneData.globalData.ks = 0.5;
     m_sceneData.globalData.kt = 0;
 
-    // create a point light (simulate the sun being the light source)
+    // create a directional light (simulate the sun being the light source)
     m_sceneData.lights.clear();
-    SceneLightData light = SceneLightData{0, LightType::LIGHT_POINT, SceneColor{1,1,1,1}, glm::vec3(1,0,0), glm::vec4(3,3,3,1), glm::vec4(-2,-4,-6,0), 0, 0, 0, 0};
+    SceneLightData light = SceneLightData{0, LightType::LIGHT_DIRECTIONAL, SceneColor{1,1,1,1}, glm::vec3(1,0,0), glm::vec4(3,3,3,1), glm::vec4(-2,-4,-6,0), 0, 0, 0, 0};
     m_sceneData.lights.push_back(light);
 }
 

@@ -5,6 +5,8 @@
 
 enum blockType { Grass, Dirt, Stone, Water, Snow };
 
+// Define block material properties that remain consistent
+const SceneColor blockAmbient = SceneColor{0.5,0.5,0.5,1};
 const SceneColor blockSpecular = SceneColor{1,1,1,1};
 const float blockShininess = 30;
 
