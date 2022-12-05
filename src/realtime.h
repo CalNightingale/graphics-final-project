@@ -42,7 +42,6 @@ private:
     void mouseMoveEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
     void rebuildMatrices();
-    void computeSceneShapeData(const std::vector<RenderShapeData> &shapes);
     std::tuple<GLint, GLint, GLint, GLint> initializeShader();
     void renderShape(Shape shape, GLint ambLoc, GLint diffLoc, GLint specLoc, GLint shineLoc);
 

@@ -379,42 +379,6 @@ void Realtime::resizeGL(int w, int h) {
     rebuildMatrices();
 }
 
-/**
- * @brief Realtime::computeSceneShapeData iterate through the shapes in the scene and compute their vertex data.
- * Store both information about their shape primitive and vertex data in m_shapeData, as both are needed for rendering
- */
-void Realtime::computeSceneShapeData(const std::vector<RenderShapeData> &shapes) {
-    m_shapeData.clear();
-    for (const RenderShapeData &shape : shapes) {
-        std::vector<float> curVertexData;
-        switch(shape.primitive.type) {
-        case PrimitiveType::PRIMITIVE_SPHERE: {
-            Sphere sphere;
-            sphere.updateParams(settings.shapeParameter1, settings.shapeParameter2, shape);
-            curVertexData = sphere.generateShape();
-            break;
-        } case PrimitiveType::PRIMITIVE_CONE: {
-            Cone cone;
-            cone.updateParams(settings.shapeParameter1, settings.shapeParameter2, shape);
-            curVertexData = cone.generateShape();
-            break;
-        } case PrimitiveType::PRIMITIVE_CUBE: {
-            Cube cube;
-            cube.updateParams(settings.shapeParameter1, shape);
-            curVertexData = cube.generateShape();
-            break;
-        } case PrimitiveType::PRIMITIVE_CYLINDER: {
-            Cylinder cylinder;
-            cylinder.updateParams(settings.shapeParameter1, settings.shapeParameter2, shape);
-            curVertexData = cylinder.generateShape();
-            break;
-        } default:
-            std::cout << "WARNING: SKIPPING UNSUPPORTED SHAPE TYPE" << std::endl;
-        }
-        m_shapeData.push_back(Shape{shape, curVertexData});
-    }
-}
-
 void Realtime::computeBlockShapeData() {
     m_shapeData.clear();
     for (const Block &block : m_blockData) {
@@ -452,7 +416,6 @@ void Realtime::sceneChanged() {
     //SceneParser::parse(settings.sceneFilePath, m_sceneData);
     populateSceneData();
     rebuildMatrices();
-    //computeSceneShapeData(m_sceneData.shapes);
     genTestBlockData();
     computeBlockShapeData();
     update(); // asks for a PaintGL() call to occur
@@ -460,7 +423,6 @@ void Realtime::sceneChanged() {
 
 void Realtime::settingsChanged() {
     rebuildMatrices();
-    //computeSceneShapeData(m_sceneData.shapes);
     computeBlockShapeData();
     update(); // asks for a PaintGL() call to occur
 }
