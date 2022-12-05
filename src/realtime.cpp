@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <iostream>
+#include "glm/gtx/string_cast.hpp"
 #include "settings.h"
 #include "./utils/shaderloader.h"
 #include "shapes/cone.h"
@@ -134,6 +135,9 @@ void Realtime::initializeGL() {
 
     makeFBO();
     glUseProgram(0);
+
+    // REMOVE LATER! FOR TESTING
+    genTestBlockData();
 }
 
 /**
@@ -420,10 +424,33 @@ void Realtime::computeBlockShapeData() {
 
 void Realtime::genTestBlockData() {
     m_blockData.push_back(Block{glm::vec3(0,0,0), Grass});
+    m_blockData.push_back(Block{glm::vec3(1,0,0), Stone});
+    m_blockData.push_back(Block{glm::vec3(0,0,1), Dirt});
+
+}
+
+void Realtime::populateSceneData() {
+    m_sceneData.cameraData.aperture = 0;
+    m_sceneData.cameraData.focalLength = 0;
+    m_sceneData.cameraData.heightAngle = 0.523599;
+    m_sceneData.cameraData.pos = glm::vec4(-6.000000, 4.000000, 4.000000, 1.000000);
+    m_sceneData.cameraData.look = glm::vec4(6.000000, -4.000000, -4.000000, 0.000000);
+    m_sceneData.cameraData.up = glm::vec4(0.000000, 1.000000, 0.000000, 0.000000);
+
+    m_sceneData.globalData.ka = 0.2;
+    m_sceneData.globalData.kd = 0.5;
+    m_sceneData.globalData.ks = 0.5;
+    m_sceneData.globalData.kt = 0;
+
+    // create a point light (simulate the sun being the light source)
+    m_sceneData.lights.clear();
+    SceneLightData light = SceneLightData{0, LightType::LIGHT_POINT, SceneColor{1,1,1,1}, glm::vec3(1,0,0), glm::vec4(3,3,3,1), glm::vec4(-2,-4,-6,0), 0, 0, 0, 0};
+    m_sceneData.lights.push_back(light);
 }
 
 void Realtime::sceneChanged() {
-    SceneParser::parse(settings.sceneFilePath, m_sceneData);
+    //SceneParser::parse(settings.sceneFilePath, m_sceneData);
+    populateSceneData();
     rebuildMatrices();
     //computeSceneShapeData(m_sceneData.shapes);
     genTestBlockData();
@@ -433,7 +460,8 @@ void Realtime::sceneChanged() {
 
 void Realtime::settingsChanged() {
     rebuildMatrices();
-    computeSceneShapeData(m_sceneData.shapes);
+    //computeSceneShapeData(m_sceneData.shapes);
+    computeBlockShapeData();
     update(); // asks for a PaintGL() call to occur
 }
 

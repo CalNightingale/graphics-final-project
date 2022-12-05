@@ -87,4 +87,5 @@ private:
     std::vector<Block> m_blockData;
     void computeBlockShapeData();
     void genTestBlockData();
+    void populateSceneData();
 };
