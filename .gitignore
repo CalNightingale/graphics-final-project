@@ -11,3 +11,4 @@ StaticGLEW_autogen/
 graphics-final*
 qtcsettings.cmake
 CMakeLists.txt.user
+libStaticGLEW.a
