@@ -138,6 +138,9 @@ void Realtime::initializeGL() {
 
     // REMOVE LATER! FOR TESTING
     genTestBlockData();
+    populateSceneData();
+    rebuildMatrices();
+    computeBlockShapeData();
 }
 
 /**
@@ -393,6 +396,7 @@ void Realtime::genTestBlockData() {
 
 }
 
+// WANT TO MODIFY DEFAULT SETTINGS??? DO SO HERE!!!
 void Realtime::populateSceneData() {
     m_sceneData.cameraData.aperture = 0;
     m_sceneData.cameraData.focalLength = 0;
