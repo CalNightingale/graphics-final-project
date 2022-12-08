@@ -87,4 +87,5 @@ private:
     void computeBlockShapeData();
     void genTestBlockData();
     void populateSceneData();
+    void genBiomeShapes();
 };

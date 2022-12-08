@@ -15,6 +15,8 @@
 
 #include "src/voronoi/src/jc_voronoi.h"
 
+#define GL_SILENCE_DEPRECATION
+
 // ================== Project 5: Lights, Camera
 
 Realtime::Realtime(QWidget *parent)
@@ -143,6 +145,7 @@ void Realtime::initializeGL() {
     populateSceneData();
     rebuildMatrices();
     computeBlockShapeData();
+    genBiomeShapes();
 }
 
 /**
@@ -412,6 +415,46 @@ void Realtime::genTestBlockData() {
     m_blockData.push_back(Block{glm::vec3(0,1,1), Snow});
     m_blockData.push_back(Block{glm::vec3(1,-1,1), Water});
 
+}
+
+// Use voronoi library to create the biomes we're after
+void Realtime::genBiomeShapes() {
+    int num_biomes = 20;
+
+    // generate points to draw
+    jcv_point points[num_biomes];
+    const jcv_site* sites;
+    jcv_graphedge* graph_edge;
+    jcv_rect bounding_box = { { 0.0f, 0.0f }, { 1.0f, 1.0f } };
+    srand(0);
+    for (int i = 0; i < num_biomes; i++) {
+      points[i].x = (float)(rand()/(1.0f + RAND_MAX));
+      points[i].y = (float)(rand()/(1.0f + RAND_MAX));
+    }
+
+    printf("# Seed sites\n");
+    for (int i=0; i<num_biomes; i++) {
+      printf("%f %f\n", (double)points[i].x, (double)points[i].y);
+    }
+
+    jcv_diagram diagram;
+    memset(&diagram, 0, sizeof(jcv_diagram));
+    jcv_diagram_generate(num_biomes, (const jcv_point *)points, &bounding_box, 0, &diagram);
+
+    printf("# Edges\n");
+    sites = jcv_diagram_get_sites(&diagram);
+    for (int i=0; i<diagram.numsites; i++) {
+
+      graph_edge = sites[i].edges;
+      while (graph_edge) {
+        // This approach will potentially print shared edges twice
+        printf("%f %f\n", (double)graph_edge->pos[0].x, (double)graph_edge->pos[0].y);
+        printf("%f %f\n", (double)graph_edge->pos[1].x, (double)graph_edge->pos[1].y);
+        graph_edge = graph_edge->next;
+      }
+    }
+
+    jcv_diagram_free(&diagram);
 }
 
 // WANT TO MODIFY DEFAULT SETTINGS??? DO SO HERE!!!
