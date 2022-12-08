@@ -141,11 +141,12 @@ void Realtime::initializeGL() {
     glUseProgram(0);
 
     // REMOVE LATER! FOR TESTING
-    genTestBlockData();
+    //genTestBlockData();
     populateSceneData();
+    settings.farPlane = 1000;
     rebuildMatrices();
-    computeBlockShapeData();
     genBiomeShapes();
+    computeBlockShapeData();
 }
 
 /**
@@ -425,11 +426,11 @@ void Realtime::genBiomeShapes() {
     jcv_point points[num_biomes];
     const jcv_site* sites;
     jcv_graphedge* graph_edge;
-    jcv_rect bounding_box = { { 0.0f, 0.0f }, { 1.0f, 1.0f } };
+    jcv_rect bounding_box = { { 0.0f, 0.0f }, { 255.0f, 255.0f } };
     srand(0);
     for (int i = 0; i < num_biomes; i++) {
-      points[i].x = (float)(rand()/(1.0f + RAND_MAX));
-      points[i].y = (float)(rand()/(1.0f + RAND_MAX));
+      points[i].x = round((float)(rand()/(1.0f + RAND_MAX) * 255));
+      points[i].y = round((float)(rand()/(1.0f + RAND_MAX) * 255));
     }
 
     printf("# Seed sites\n");
@@ -443,18 +444,46 @@ void Realtime::genBiomeShapes() {
 
     printf("# Edges\n");
     sites = jcv_diagram_get_sites(&diagram);
+    m_blockData.clear();
     for (int i=0; i<diagram.numsites; i++) {
-
       graph_edge = sites[i].edges;
       while (graph_edge) {
         // This approach will potentially print shared edges twice
-        printf("%f %f\n", (double)graph_edge->pos[0].x, (double)graph_edge->pos[0].y);
-        printf("%f %f\n", (double)graph_edge->pos[1].x, (double)graph_edge->pos[1].y);
+        // printf("%f %f\n", (double)graph_edge->pos[0].x, (double)graph_edge->pos[0].y);
+        // printf("%f %f\n", (double)graph_edge->pos[1].x, (double)graph_edge->pos[1].y);
+        int startX = round(graph_edge->pos[0].x);
+        int startY = round(graph_edge->pos[0].y);
+        int endX = round(graph_edge->pos[1].x);
+        int endY = round(graph_edge->pos[1].y);
+        // define the step to take
+        float xStep = 1.f / abs(endX - startX);
+        float yStep = 1.f / abs(endY - startY);
+        int curX = fmin(startX, endX);
+        int curY = fmin(startY, endY);
+        bool edgeRendered = false;
+        int iteration = 0;
+        while (! edgeRendered) {
+            int potX = round(fmin(startX, endX) + xStep*iteration*abs(endX-startX));
+            int potY = round(fmin(startY, endY) + yStep*iteration*abs(endY-startY));
+            if (potX > curX) {
+                //std::cout << "PUSHED A BLOCK" << std::endl;
+                m_blockData.push_back(Block{glm::vec3(curX,0,curY), Water});
+                curX = potX;
+            }
+            if (potY > curY) {
+                //std::cout << "PUSHED A BLOCK" << std::endl;
+                m_blockData.push_back(Block{glm::vec3(curX,0,curY), Water});
+                curY = potY;
+            }
+            iteration++;
+            if (curY >= fmax(startY, endY) && curX >= fmax(startX, endX)) edgeRendered = true;
+        }
         graph_edge = graph_edge->next;
       }
     }
 
     jcv_diagram_free(&diagram);
+
 }
 
 // WANT TO MODIFY DEFAULT SETTINGS??? DO SO HERE!!!
@@ -462,9 +491,9 @@ void Realtime::populateSceneData() {
     m_sceneData.cameraData.aperture = 0;
     m_sceneData.cameraData.focalLength = 0;
     m_sceneData.cameraData.heightAngle = 0.523599;
-    m_sceneData.cameraData.pos = glm::vec4(-6.000000, 4.000000, 4.000000, 1.000000);
-    m_sceneData.cameraData.look = glm::vec4(6.000000, -4.000000, -4.000000, 0.000000);
-    m_sceneData.cameraData.up = glm::vec4(0.000000, 1.000000, 0.000000, 0.000000);
+    m_sceneData.cameraData.pos = glm::vec4(255/2, 500, 255/2, 1);
+    m_sceneData.cameraData.look = glm::vec4(0, -1, 0, 0);
+    m_sceneData.cameraData.up = glm::vec4(1, 0, 0, 0);
 
     m_sceneData.globalData.ka = 0.2;
     m_sceneData.globalData.kd = 0.5;
@@ -481,7 +510,7 @@ void Realtime::sceneChanged() {
     //SceneParser::parse(settings.sceneFilePath, m_sceneData);
     populateSceneData();
     rebuildMatrices();
-    genTestBlockData();
+    //genTestBlockData();
     computeBlockShapeData();
     update(); // asks for a PaintGL() call to occur
 }
