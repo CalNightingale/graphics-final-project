@@ -51,6 +51,9 @@ add_executable(${PROJECT_NAME}
     src/shapes/Shape.h
     src/block.h
     src/debug.h
+
+    # voronoi files
+    src/voronoi/src/jc_voronoi.h
 )
 
 # GLM: this creates its library and allows you to `#include "glm/..."`

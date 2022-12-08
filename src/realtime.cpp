@@ -13,6 +13,8 @@
 #include "shapes/sphere.h"
 #include "utils/sceneparser.h"
 
+#include "src/voronoi/src/jc_voronoi.h"
+
 // ================== Project 5: Lights, Camera
 
 Realtime::Realtime(QWidget *parent)
