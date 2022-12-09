@@ -423,17 +423,15 @@ void drawEdge(std::vector<Block>& blockData, jcv_graphedge* graph_edge) {
     int startY = round(graph_edge->pos[0].y);
     int endX = round(graph_edge->pos[1].x);
     int endY = round(graph_edge->pos[1].y);
-    // do the start and end blocks
-    blockData.push_back(Block{glm::vec3(startX,0,startY), Water});
-    blockData.push_back(Block{glm::vec3(endX,0,endY), Water});
-    int lastX = startX;
-    int lastY = startY;
-    float stepsize = 0.01;
+    int lastX = -1;
+    int lastY = -1;
+    // parameterize edge with t and iterate over it
+    float stepsize = 0.001;
     for (float t = 0; t < 1; t += stepsize) {
         int x = round((1-t)*startX + t*endX);
         int y = round((1-t)*startY + t*endY);
         if (x == lastX && y == lastY) continue; // do not render repeats
-        blockData.push_back(Block{glm::vec3(x,0,y), Water});
+        blockData.push_back(Block{glm::vec3(x,0,y), Snow});
         lastX = x;
         lastY = y;
     }
@@ -447,11 +445,11 @@ void Realtime::genBiomeShapes() {
     jcv_point points[num_biomes];
     const jcv_site* sites;
     jcv_graphedge* graph_edge;
-    jcv_rect bounding_box = { { 0.0f, 0.0f }, { 255.0f, 255.0f } };
+    jcv_rect bounding_box = { { 0.0f, 0.0f }, { static_cast<jcv_real>(settings.renderWidth), static_cast<jcv_real>(settings.renderWidth) } };
     srand(0);
     for (int i = 0; i < num_biomes; i++) {
-      points[i].x = round((float)(rand()/(1.0f + RAND_MAX) * 255));
-      points[i].y = round((float)(rand()/(1.0f + RAND_MAX) * 255));
+      points[i].x = round((float)(rand()/(1.0f + RAND_MAX) * settings.renderWidth));
+      points[i].y = round((float)(rand()/(1.0f + RAND_MAX) * settings.renderWidth));
     }
 
     printf("# Seed sites\n");
