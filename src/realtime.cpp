@@ -439,44 +439,41 @@ void drawEdge(std::vector<Block>& blockData, jcv_graphedge* graph_edge) {
 
 // Use voronoi library to create the biomes we're after
 void Realtime::genBiomeShapes() {
-    int num_biomes = 20;
-
-    // generate points to draw
-    jcv_point points[num_biomes];
+    // Initialize necessary variables
+    jcv_point points[settings.numBiomes];
     const jcv_site* sites;
     jcv_graphedge* graph_edge;
     jcv_rect bounding_box = { { 0.0f, 0.0f }, { static_cast<jcv_real>(settings.renderWidth), static_cast<jcv_real>(settings.renderWidth) } };
+
+    // TODO ONCE FINISHED, USE time(NULL). Till then use 0 for testing - it will always gen the same diagram
+    // srand(time(NULL));
     srand(0);
-    for (int i = 0; i < num_biomes; i++) {
+
+    // Generate center point for each biome
+    for (int i = 0; i < settings.numBiomes; i++) {
       points[i].x = round((float)(rand()/(1.0f + RAND_MAX) * settings.renderWidth));
       points[i].y = round((float)(rand()/(1.0f + RAND_MAX) * settings.renderWidth));
     }
 
-    printf("# Seed sites\n");
-    for (int i=0; i<num_biomes; i++) {
-      printf("%f %f\n", (double)points[i].x, (double)points[i].y);
-    }
-
+    // Create voronoi diagram using the points
     jcv_diagram diagram;
     memset(&diagram, 0, sizeof(jcv_diagram));
-    jcv_diagram_generate(num_biomes, (const jcv_point *)points, &bounding_box, 0, &diagram);
+    jcv_diagram_generate(settings.numBiomes, (const jcv_point *)points, &bounding_box, 0, &diagram);
 
-    printf("# Edges\n");
+    // Iterate through edges and draw
     sites = jcv_diagram_get_sites(&diagram);
     m_blockData.clear();
     for (int i=0; i<diagram.numsites; i++) {
       graph_edge = sites[i].edges;
       while (graph_edge) {
         // This approach will potentially print shared edges twice
-        // printf("%f %f\n", (double)graph_edge->pos[0].x, (double)graph_edge->pos[0].y);
-        // printf("%f %f\n", (double)graph_edge->pos[1].x, (double)graph_edge->pos[1].y);
         drawEdge(m_blockData, graph_edge);
         graph_edge = graph_edge->next;
       }
     }
 
+    // Free the diagram's memory once done
     jcv_diagram_free(&diagram);
-
 }
 
 // WANT TO MODIFY DEFAULT SETTINGS??? DO SO HERE!!!
