@@ -418,6 +418,27 @@ void Realtime::genTestBlockData() {
 
 }
 
+void drawEdge(std::vector<Block>& blockData, jcv_graphedge* graph_edge) {
+    int startX = round(graph_edge->pos[0].x);
+    int startY = round(graph_edge->pos[0].y);
+    int endX = round(graph_edge->pos[1].x);
+    int endY = round(graph_edge->pos[1].y);
+    // do the start and end blocks
+    blockData.push_back(Block{glm::vec3(startX,0,startY), Water});
+    blockData.push_back(Block{glm::vec3(endX,0,endY), Water});
+    int lastX = startX;
+    int lastY = startY;
+    float stepsize = 0.01;
+    for (float t = 0; t < 1; t += stepsize) {
+        int x = round((1-t)*startX + t*endX);
+        int y = round((1-t)*startY + t*endY);
+        if (x == lastX && y == lastY) continue; // do not render repeats
+        blockData.push_back(Block{glm::vec3(x,0,y), Water});
+        lastX = x;
+        lastY = y;
+    }
+}
+
 // Use voronoi library to create the biomes we're after
 void Realtime::genBiomeShapes() {
     int num_biomes = 20;
@@ -451,33 +472,7 @@ void Realtime::genBiomeShapes() {
         // This approach will potentially print shared edges twice
         // printf("%f %f\n", (double)graph_edge->pos[0].x, (double)graph_edge->pos[0].y);
         // printf("%f %f\n", (double)graph_edge->pos[1].x, (double)graph_edge->pos[1].y);
-        int startX = round(graph_edge->pos[0].x);
-        int startY = round(graph_edge->pos[0].y);
-        int endX = round(graph_edge->pos[1].x);
-        int endY = round(graph_edge->pos[1].y);
-        // define the step to take
-        float xStep = 1.f / abs(endX - startX);
-        float yStep = 1.f / abs(endY - startY);
-        int curX = fmin(startX, endX);
-        int curY = fmin(startY, endY);
-        bool edgeRendered = false;
-        int iteration = 0;
-        while (! edgeRendered) {
-            int potX = round(fmin(startX, endX) + xStep*iteration*abs(endX-startX));
-            int potY = round(fmin(startY, endY) + yStep*iteration*abs(endY-startY));
-            if (potX > curX) {
-                //std::cout << "PUSHED A BLOCK" << std::endl;
-                m_blockData.push_back(Block{glm::vec3(curX,0,curY), Water});
-                curX = potX;
-            }
-            if (potY > curY) {
-                //std::cout << "PUSHED A BLOCK" << std::endl;
-                m_blockData.push_back(Block{glm::vec3(curX,0,curY), Water});
-                curY = potY;
-            }
-            iteration++;
-            if (curY >= fmax(startY, endY) && curX >= fmax(startX, endX)) edgeRendered = true;
-        }
+        drawEdge(m_blockData, graph_edge);
         graph_edge = graph_edge->next;
       }
     }
@@ -600,12 +595,12 @@ void Realtime::mouseMoveEvent(QMouseEvent *event) {
 
         // Use deltaX and deltaY here to rotate
         if (m_mouseDown) {
-            glm::mat3 xRot = computeRotationMatrix(5 * (float)deltaX / width(), glm::vec3(0,1,0));
+            glm::mat3 xRot = computeRotationMatrix(settings.movementSpeed * (float)deltaX / width(), glm::vec3(0,1,0));
             m_sceneData.cameraData.pos = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.pos), 1);
             m_sceneData.cameraData.look = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.look), 0);
             m_sceneData.cameraData.up = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.up), 0);
             glm::vec3 verticalAxis = normalize(cross(glm::vec3(m_sceneData.cameraData.look), glm::vec3(m_sceneData.cameraData.up)));
-            glm::mat3 yRot = computeRotationMatrix(5 * (float)deltaY / height(), verticalAxis);
+            glm::mat3 yRot = computeRotationMatrix(settings.movementSpeed * (float)deltaY / height(), verticalAxis);
             m_sceneData.cameraData.pos = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.pos), 1);
             m_sceneData.cameraData.look = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.look), 0);
             m_sceneData.cameraData.up = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.up), 0);
@@ -624,29 +619,29 @@ void Realtime::timerEvent(QTimerEvent *event) {
     // Use deltaTime and m_keyMap here to move around
     // handle forward motion
     if (m_keyMap[Qt::Key_W]) {
-        m_sceneData.cameraData.pos += 5*deltaTime*normalize(m_sceneData.cameraData.look);
+        m_sceneData.cameraData.pos += settings.movementSpeed*deltaTime*normalize(m_sceneData.cameraData.look);
     }
     // backward
     if (m_keyMap[Qt::Key_S]) {
-        m_sceneData.cameraData.pos -= 5*deltaTime*normalize(m_sceneData.cameraData.look);
+        m_sceneData.cameraData.pos -= settings.movementSpeed*deltaTime*normalize(m_sceneData.cameraData.look);
     }
     // left
     if (m_keyMap[Qt::Key_A]) {
         glm::vec4 lateralDirection = glm::vec4(glm::cross(glm::vec3(m_sceneData.cameraData.look), glm::vec3(m_sceneData.cameraData.up)), 0);
-        m_sceneData.cameraData.pos -= 5*deltaTime*normalize(lateralDirection);
+        m_sceneData.cameraData.pos -= settings.movementSpeed*deltaTime*normalize(lateralDirection);
     }
     // right
     if (m_keyMap[Qt::Key_D]) {
         glm::vec4 lateralDirection = glm::vec4(glm::cross(glm::vec3(m_sceneData.cameraData.look), glm::vec3(m_sceneData.cameraData.up)), 0);
-        m_sceneData.cameraData.pos += 5*deltaTime*normalize(lateralDirection);
+        m_sceneData.cameraData.pos += settings.movementSpeed*deltaTime*normalize(lateralDirection);
     }
     // up
     if (m_keyMap[Qt::Key_Space]) {
-        m_sceneData.cameraData.pos += 5*deltaTime*glm::vec4(0,1,0,0);
+        m_sceneData.cameraData.pos += settings.movementSpeed*deltaTime*glm::vec4(0,1,0,0);
     }
     // down
     if (m_keyMap[Qt::Key_Control]) {
-        m_sceneData.cameraData.pos += 5*deltaTime*glm::vec4(0,-1,0,0);
+        m_sceneData.cameraData.pos += settings.movementSpeed*deltaTime*glm::vec4(0,-1,0,0);
     }
 
     rebuildMatrices();
