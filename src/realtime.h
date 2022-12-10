@@ -88,4 +88,6 @@ private:
     void genTestBlockData();
     void populateSceneData();
     void genBiomeShapes();
+
+    int m_biomeMap[256][256];
 };

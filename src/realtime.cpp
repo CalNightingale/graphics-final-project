@@ -418,28 +418,10 @@ void Realtime::genTestBlockData() {
 
 }
 
-void drawEdge(std::vector<Block>& blockData, jcv_graphedge* graph_edge) {
-    int startX = round(graph_edge->pos[0].x);
-    int startY = round(graph_edge->pos[0].y);
-    int endX = round(graph_edge->pos[1].x);
-    int endY = round(graph_edge->pos[1].y);
-    int lastX = -1;
-    int lastY = -1;
-    // parameterize edge with t and iterate over it
-    float stepsize = 0.001;
-    for (float t = 0; t < 1; t += stepsize) {
-        int x = round((1-t)*startX + t*endX);
-        int y = round((1-t)*startY + t*endY);
-        if (x == lastX && y == lastY) continue; // do not render repeats
-        blockData.push_back(Block{glm::vec3(x,0,y), Snow});
-        lastX = x;
-        lastY = y;
-    }
-}
-
 // Use voronoi library to create the biomes we're after
 void Realtime::genBiomeShapes() {
     // Initialize necessary variables
+    memset(m_biomeMap, 0, sizeof(m_biomeMap));
     jcv_point points[settings.numBiomes];
     const jcv_site* sites;
     jcv_graphedge* graph_edge;
@@ -466,12 +448,47 @@ void Realtime::genBiomeShapes() {
     for (int i=0; i<diagram.numsites; i++) {
       graph_edge = sites[i].edges;
       while (graph_edge) {
-        // This approach will potentially print shared edges twice
-        drawEdge(m_blockData, graph_edge);
-        graph_edge = graph_edge->next;
+          // This approach will potentially print shared edges twice
+          int startX = round(graph_edge->pos[0].x);
+          int startY = round(graph_edge->pos[0].y);
+          int endX = round(graph_edge->pos[1].x);
+          int endY = round(graph_edge->pos[1].y);
+          int lastX = -1;
+          int lastY = -1;
+          // parameterize edge with t and iterate over it
+          float stepsize = 0.001;
+          for (float t = 0; t < 1; t += stepsize) {
+              int x = round((1-t)*startX + t*endX);
+              int y = round((1-t)*startY + t*endY);
+              if (x == lastX && y == lastY) continue; // do not render repeats
+              m_blockData.push_back(Block{glm::vec3(x,0,y), Snow}); // COMMENT OUT TO AVOID RENDERING EDGES
+              m_biomeMap[y][x] = -1;
+              lastX = x;
+              lastY = y;
+          }
+          graph_edge = graph_edge->next;
       }
     }
 
+/*
+    // iterate through each site
+    // record the biome id of all points falling within the site (for use later in rendering)
+    glm::vec2 rayStart = glm::vec2(-5,-5);
+    Ray curRay;
+    for (int x = 0; x < settings.renderWidth; x++) {
+        for (int y = 0; y < settings.renderWidth; y++) {
+            curRay = Ray{rayStart, glm::vec2(x,y) - rayStart};
+            for (int s = 0; s < settings.numBiomes; s++) {
+                const jcv_site* site = &diagram.sites[s];
+                const jcv_graphedge* e = site->edges;
+                // iterate through each edge, see if our ray hits it
+                while (e) {
+                    e = e->next;
+                }
+            }
+        }
+    }
+*/
     // Free the diagram's memory once done
     jcv_diagram_free(&diagram);
 }
