@@ -418,6 +418,18 @@ void Realtime::genTestBlockData() {
 
 }
 
+void Realtime::recurseBiomes(int x, int y, int biomeID) {
+    if (x < 0 || y < 0 || x > 255 || y > 255) return; // OB point
+    if (m_biomeMap[y][x] != 0) return; // edge OR already checked
+
+    m_biomeMap[y][x] = biomeID; // set biomeID
+
+    recurseBiomes(x + 1, y, biomeID);
+    recurseBiomes(x - 1, y, biomeID);
+    recurseBiomes(x, y + 1, biomeID);
+    recurseBiomes(x, y - 1, biomeID);
+}
+
 // Use voronoi library to create the biomes we're after
 void Realtime::genBiomeShapes() {
     // Initialize necessary variables
@@ -462,33 +474,17 @@ void Realtime::genBiomeShapes() {
               int y = round((1-t)*startY + t*endY);
               if (x == lastX && y == lastY) continue; // do not render repeats
               m_blockData.push_back(Block{glm::vec3(x,0,y), Snow}); // COMMENT OUT TO AVOID RENDERING EDGES
-              m_biomeMap[y][x] = -1;
+              m_biomeMap[y][x] = -1; // record this coordinate as the edge
               lastX = x;
               lastY = y;
           }
           graph_edge = graph_edge->next;
       }
+      int centX = round(sites[i].p.x);
+      int centY = round(sites[i].p.y);
+      recurseBiomes(centX, centY, sites[i].index + 1);
     }
 
-/*
-    // iterate through each site
-    // record the biome id of all points falling within the site (for use later in rendering)
-    glm::vec2 rayStart = glm::vec2(-5,-5);
-    Ray curRay;
-    for (int x = 0; x < settings.renderWidth; x++) {
-        for (int y = 0; y < settings.renderWidth; y++) {
-            curRay = Ray{rayStart, glm::vec2(x,y) - rayStart};
-            for (int s = 0; s < settings.numBiomes; s++) {
-                const jcv_site* site = &diagram.sites[s];
-                const jcv_graphedge* e = site->edges;
-                // iterate through each edge, see if our ray hits it
-                while (e) {
-                    e = e->next;
-                }
-            }
-        }
-    }
-*/
     // Free the diagram's memory once done
     jcv_diagram_free(&diagram);
 }
