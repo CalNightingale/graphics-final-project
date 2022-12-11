@@ -36,6 +36,7 @@ add_executable(${PROJECT_NAME}
     src/shapes/sphere.cpp
     src/shapes/cube.cpp
     src/shapes/cylinder.cpp
+    src/skybox.cpp
 
     src/mainwindow.h
     src/realtime.h
@@ -79,6 +80,8 @@ qt6_add_resources(${PROJECT_NAME} "Resources"
         resources/shaders/texture.vert
         resources/shaders/phong.frag
         resources/shaders/phong.vert
+        resources/shaders/skybox.frag
+        resources/shaders/skybox.vert
 )
 
 # GLEW: this provides support for Windows (including 64-bit)

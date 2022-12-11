@@ -141,6 +141,9 @@ void Realtime::initializeGL() {
     populateSceneData();
     rebuildMatrices();
     computeBlockShapeData();
+
+    setupSkybox();
+
 }
 
 /**
@@ -264,6 +267,8 @@ void Realtime::paintGL() {
     glViewport(0, 0, m_fbo_width, m_fbo_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     paintGeometry();
+    paintSkybox();
+
     // Task 25: Bind the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     // Task 26: Clear the color and depth buffers
@@ -574,6 +579,9 @@ void Realtime::timerEvent(QTimerEvent *event) {
     if (m_keyMap[Qt::Key_Control]) {
         m_sceneData.cameraData.pos += 5*deltaTime*glm::vec4(0,-1,0,0);
     }
+
+    updateSkybox();
+
 
     rebuildMatrices();
     update(); // asks for a PaintGL() call to occur
