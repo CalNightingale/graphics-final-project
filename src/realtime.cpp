@@ -395,18 +395,29 @@ void Realtime::computeBlockShapeData() {
     }
 }
 
+int Realtime::getHeight(int x, int z) {
+    if (x >= 0 && x < settings.renderWidth && z >= 0 && z < settings.renderWidth) return m_heightMap[z][x];
+    return 0;
+}
+
 void Realtime::genBlockData() {
     m_blockData.clear();
     for (int x = 0; x < settings.renderWidth; x++) {
         for (int z = 0; z < settings.renderWidth; z++) {
             int biomeID = m_biomeMap[z][x];
-            int height = m_heightMap[z][x];
+            int y = m_heightMap[z][x];
             SceneColor col = SceneColor{1,1,1,1};
             if (biomeID > -1) {
                 col = m_biomeColors[biomeID];
-                //std::cout << col.r << "," << col.g << "," << col.b << std::endl;
             }
-            m_blockData.push_back(Block{glm::vec3(x, height, z), col});
+            // start at top, generate blocks until lower than all surrounding blocks
+            int minHeight = fmin(getHeight(x, z+1), getHeight(x, z-1));
+            minHeight = fmin(minHeight, getHeight(x-1,z));
+            minHeight = fmin(minHeight, getHeight(x+1,z));
+            while (y > minHeight) {
+                m_blockData.push_back(Block{glm::vec3(x, y, z), col});
+                y--;
+            }
         }
     }
 }
