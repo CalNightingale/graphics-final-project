@@ -87,4 +87,8 @@ private:
     void computeBlockShapeData();
     void genTestBlockData();
     void populateSceneData();
+    void genBiomeShapes();
+
+    void recurseBiomes(int x, int y, int biomeID);
+    int m_biomeMap[256][256];
 };

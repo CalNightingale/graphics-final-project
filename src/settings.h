@@ -15,6 +15,9 @@ struct Settings {
     bool extraCredit2 = false;
     bool extraCredit3 = false;
     bool extraCredit4 = false;
+    int movementSpeed = 10;
+    int renderWidth = 255;
+    int numBiomes = 20;
 };
 
 

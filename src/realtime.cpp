@@ -13,6 +13,10 @@
 #include "shapes/sphere.h"
 #include "utils/sceneparser.h"
 
+#include "src/voronoi/src/jc_voronoi.h"
+
+#define GL_SILENCE_DEPRECATION
+
 // ================== Project 5: Lights, Camera
 
 Realtime::Realtime(QWidget *parent)
@@ -137,9 +141,11 @@ void Realtime::initializeGL() {
     glUseProgram(0);
 
     // REMOVE LATER! FOR TESTING
-    genTestBlockData();
+    //genTestBlockData();
     populateSceneData();
+    settings.farPlane = 1000;
     rebuildMatrices();
+    genBiomeShapes();
     computeBlockShapeData();
 }
 
@@ -412,14 +418,85 @@ void Realtime::genTestBlockData() {
 
 }
 
+void Realtime::recurseBiomes(int x, int y, int biomeID) {
+    if (x < 0 || y < 0 || x > 255 || y > 255) return; // OB point
+    if (m_biomeMap[y][x] != 0) return; // edge OR already checked
+
+    m_biomeMap[y][x] = biomeID; // set biomeID
+
+    recurseBiomes(x + 1, y, biomeID);
+    recurseBiomes(x - 1, y, biomeID);
+    recurseBiomes(x, y + 1, biomeID);
+    recurseBiomes(x, y - 1, biomeID);
+}
+
+// Use voronoi library to create the biomes we're after
+void Realtime::genBiomeShapes() {
+    // Initialize necessary variables
+    memset(m_biomeMap, 0, sizeof(m_biomeMap));
+    jcv_point points[settings.numBiomes];
+    const jcv_site* sites;
+    jcv_graphedge* graph_edge;
+    jcv_rect bounding_box = { { 0.0f, 0.0f }, { static_cast<jcv_real>(settings.renderWidth), static_cast<jcv_real>(settings.renderWidth) } };
+
+    // TODO ONCE FINISHED, USE time(NULL). Till then use 0 for testing - it will always gen the same diagram
+    // srand(time(NULL));
+    srand(0);
+
+    // Generate center point for each biome
+    for (int i = 0; i < settings.numBiomes; i++) {
+      points[i].x = round((float)(rand()/(1.0f + RAND_MAX) * settings.renderWidth));
+      points[i].y = round((float)(rand()/(1.0f + RAND_MAX) * settings.renderWidth));
+    }
+
+    // Create voronoi diagram using the points
+    jcv_diagram diagram;
+    memset(&diagram, 0, sizeof(jcv_diagram));
+    jcv_diagram_generate(settings.numBiomes, (const jcv_point *)points, &bounding_box, 0, &diagram);
+
+    // Iterate through edges and draw
+    sites = jcv_diagram_get_sites(&diagram);
+    m_blockData.clear();
+    for (int i=0; i<diagram.numsites; i++) {
+      graph_edge = sites[i].edges;
+      while (graph_edge) {
+          // This approach will potentially print shared edges twice
+          int startX = round(graph_edge->pos[0].x);
+          int startY = round(graph_edge->pos[0].y);
+          int endX = round(graph_edge->pos[1].x);
+          int endY = round(graph_edge->pos[1].y);
+          int lastX = -1;
+          int lastY = -1;
+          // parameterize edge with t and iterate over it
+          float stepsize = 0.001;
+          for (float t = 0; t < 1; t += stepsize) {
+              int x = round((1-t)*startX + t*endX);
+              int y = round((1-t)*startY + t*endY);
+              if (x == lastX && y == lastY) continue; // do not render repeats
+              m_blockData.push_back(Block{glm::vec3(x,0,y), Snow}); // COMMENT OUT TO AVOID RENDERING EDGES
+              m_biomeMap[y][x] = -1; // record this coordinate as the edge
+              lastX = x;
+              lastY = y;
+          }
+          graph_edge = graph_edge->next;
+      }
+      int centX = round(sites[i].p.x);
+      int centY = round(sites[i].p.y);
+      recurseBiomes(centX, centY, sites[i].index + 1);
+    }
+
+    // Free the diagram's memory once done
+    jcv_diagram_free(&diagram);
+}
+
 // WANT TO MODIFY DEFAULT SETTINGS??? DO SO HERE!!!
 void Realtime::populateSceneData() {
     m_sceneData.cameraData.aperture = 0;
     m_sceneData.cameraData.focalLength = 0;
     m_sceneData.cameraData.heightAngle = 0.523599;
-    m_sceneData.cameraData.pos = glm::vec4(-6.000000, 4.000000, 4.000000, 1.000000);
-    m_sceneData.cameraData.look = glm::vec4(6.000000, -4.000000, -4.000000, 0.000000);
-    m_sceneData.cameraData.up = glm::vec4(0.000000, 1.000000, 0.000000, 0.000000);
+    m_sceneData.cameraData.pos = glm::vec4(255/2, 500, 255/2, 1);
+    m_sceneData.cameraData.look = glm::vec4(0, -1, 0, 0);
+    m_sceneData.cameraData.up = glm::vec4(1, 0, 0, 0);
 
     m_sceneData.globalData.ka = 0.2;
     m_sceneData.globalData.kd = 0.5;
@@ -436,7 +513,7 @@ void Realtime::sceneChanged() {
     //SceneParser::parse(settings.sceneFilePath, m_sceneData);
     populateSceneData();
     rebuildMatrices();
-    genTestBlockData();
+    //genTestBlockData();
     computeBlockShapeData();
     update(); // asks for a PaintGL() call to occur
 }
@@ -526,12 +603,12 @@ void Realtime::mouseMoveEvent(QMouseEvent *event) {
 
         // Use deltaX and deltaY here to rotate
         if (m_mouseDown) {
-            glm::mat3 xRot = computeRotationMatrix(5 * (float)deltaX / width(), glm::vec3(0,1,0));
+            glm::mat3 xRot = computeRotationMatrix(settings.movementSpeed * (float)deltaX / width(), glm::vec3(0,1,0));
             m_sceneData.cameraData.pos = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.pos), 1);
             m_sceneData.cameraData.look = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.look), 0);
             m_sceneData.cameraData.up = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.up), 0);
             glm::vec3 verticalAxis = normalize(cross(glm::vec3(m_sceneData.cameraData.look), glm::vec3(m_sceneData.cameraData.up)));
-            glm::mat3 yRot = computeRotationMatrix(5 * (float)deltaY / height(), verticalAxis);
+            glm::mat3 yRot = computeRotationMatrix(settings.movementSpeed * (float)deltaY / height(), verticalAxis);
             m_sceneData.cameraData.pos = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.pos), 1);
             m_sceneData.cameraData.look = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.look), 0);
             m_sceneData.cameraData.up = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.up), 0);
@@ -550,29 +627,29 @@ void Realtime::timerEvent(QTimerEvent *event) {
     // Use deltaTime and m_keyMap here to move around
     // handle forward motion
     if (m_keyMap[Qt::Key_W]) {
-        m_sceneData.cameraData.pos += 5*deltaTime*normalize(m_sceneData.cameraData.look);
+        m_sceneData.cameraData.pos += settings.movementSpeed*deltaTime*normalize(m_sceneData.cameraData.look);
     }
     // backward
     if (m_keyMap[Qt::Key_S]) {
-        m_sceneData.cameraData.pos -= 5*deltaTime*normalize(m_sceneData.cameraData.look);
+        m_sceneData.cameraData.pos -= settings.movementSpeed*deltaTime*normalize(m_sceneData.cameraData.look);
     }
     // left
     if (m_keyMap[Qt::Key_A]) {
         glm::vec4 lateralDirection = glm::vec4(glm::cross(glm::vec3(m_sceneData.cameraData.look), glm::vec3(m_sceneData.cameraData.up)), 0);
-        m_sceneData.cameraData.pos -= 5*deltaTime*normalize(lateralDirection);
+        m_sceneData.cameraData.pos -= settings.movementSpeed*deltaTime*normalize(lateralDirection);
     }
     // right
     if (m_keyMap[Qt::Key_D]) {
         glm::vec4 lateralDirection = glm::vec4(glm::cross(glm::vec3(m_sceneData.cameraData.look), glm::vec3(m_sceneData.cameraData.up)), 0);
-        m_sceneData.cameraData.pos += 5*deltaTime*normalize(lateralDirection);
+        m_sceneData.cameraData.pos += settings.movementSpeed*deltaTime*normalize(lateralDirection);
     }
     // up
     if (m_keyMap[Qt::Key_Space]) {
-        m_sceneData.cameraData.pos += 5*deltaTime*glm::vec4(0,1,0,0);
+        m_sceneData.cameraData.pos += settings.movementSpeed*deltaTime*glm::vec4(0,1,0,0);
     }
     // down
     if (m_keyMap[Qt::Key_Control]) {
-        m_sceneData.cameraData.pos += 5*deltaTime*glm::vec4(0,-1,0,0);
+        m_sceneData.cameraData.pos += settings.movementSpeed*deltaTime*glm::vec4(0,-1,0,0);
     }
 
     rebuildMatrices();
