@@ -95,13 +95,14 @@ private:
     void genTestBlockData();
     void populateSceneData();
     void genBiomeShapes();
+    void genBlockData();
 
     // biome mapping stuff
     bool loadImageFromFile(const QString &file);
     int m_biomeImg_width;
     int m_biomeImg_height;
-    std::vector<RGBA> m_data;
-    std::vector<RGBA> m_biomeColors;
+    std::vector<SceneColor> m_data;
+    std::vector<SceneColor> m_biomeColors;
 
     void recurseBiomes(int x, int y, int biomeID);
     void computeBiomeTypes();

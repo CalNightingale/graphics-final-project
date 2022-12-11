@@ -141,12 +141,14 @@ void Realtime::initializeGL() {
     makeFBO();
     glUseProgram(0);
 
-    // REMOVE LATER! FOR TESTING
-    //genTestBlockData();
+    // Generate terrain
     populateSceneData();
     settings.farPlane = 1000;
     rebuildMatrices();
     genBiomeShapes();
+    populateMaps();
+    computeBiomeTypes();
+    genBlockData();
     computeBlockShapeData();
 }
 
@@ -310,25 +312,9 @@ Shape genShapeFromBlock(const Block &block) {
     //      also has std::string meshfile but we don't use this
     // SceneMaterial has: ambient, diffuse, spec vec4s, shininess float, and other stuff we don't need
     // generate RenderShapeData
-    SceneColor diff = SceneColor{1,1,0,1};
-    switch (block.type) {
-    case Grass:
-        diff = SceneColor{1,1,0,1};
-        break;
-    case Dirt:
-        diff = SceneColor{0.54,0.34,0.18,1};
-        break;
-    case Stone:
-        diff = SceneColor{0.43,0.43,0.43,1};
-        break;
-    case Snow:
-        diff = SceneColor{1,1,1,1};
-        break;
-    case Water:
-        diff = SceneColor{0,0,1,1};
-    }
 
-    SceneMaterial mat = SceneMaterial{blockAmbient, diff, blockSpecular, blockShininess};
+    SceneColor scaledDiff = SceneColor{block.color.r / 255, block.color.g / 255, block.color.b / 255, 1};
+    SceneMaterial mat = SceneMaterial{blockAmbient, scaledDiff, blockSpecular, blockShininess};
     ScenePrimitive prim = ScenePrimitive{PrimitiveType::PRIMITIVE_CUBE, mat};
     // compute ctm: blocks in this world are all unit sized, simply have to be translated to proper location
     glm::mat4 ctm = Cube::getTranslationMatrix(block.pos.x, block.pos.y, block.pos.z);
@@ -409,14 +395,19 @@ void Realtime::computeBlockShapeData() {
     }
 }
 
-void Realtime::genTestBlockData() {
+void Realtime::genBlockData() {
     m_blockData.clear();
-    m_blockData.push_back(Block{glm::vec3(0,0,0), Grass});
-    m_blockData.push_back(Block{glm::vec3(1,0,0), Stone});
-    m_blockData.push_back(Block{glm::vec3(0,0,1), Dirt});
-    m_blockData.push_back(Block{glm::vec3(0,1,1), Snow});
-    m_blockData.push_back(Block{glm::vec3(1,-1,1), Water});
-
+    for (int x = 0; x < settings.renderWidth; x++) {
+        for (int y = 0; y < settings.renderWidth; y++) {
+            int biomeID = m_biomeMap[y][x];
+            SceneColor col = SceneColor{1,1,1,1};
+            if (biomeID > -1) {
+                col = m_biomeColors[biomeID];
+                //std::cout << col.r << "," << col.g << "," << col.b << std::endl;
+            }
+            m_blockData.push_back(Block{glm::vec3(x, 0, y), col});
+        }
+    }
 }
 
 void Realtime::recurseBiomes(int x, int y, int biomeID) {
@@ -474,7 +465,7 @@ void Realtime::genBiomeShapes() {
               int x = round((1-t)*startX + t*endX);
               int y = round((1-t)*startY + t*endY);
               if (x == lastX && y == lastY) continue; // do not render repeats
-              m_blockData.push_back(Block{glm::vec3(x,0,y), Snow}); // COMMENT OUT TO AVOID RENDERING EDGES
+              //m_blockData.push_back(Block{glm::vec3(x,0,y), Snow}); // COMMENT OUT TO AVOID RENDERING EDGES
               m_biomeMap[y][x] = -1; // record this coordinate as the edge
               lastX = x;
               lastY = y;
@@ -523,7 +514,7 @@ void Realtime::computeBiomeTypes() {
         float avgPrecip = precipSums[i] / biomeSize[i];
         int tempImgIndex = round(avgTemp * m_biomeImg_width);
         int precipImgIndex = round(avgPrecip * m_biomeImg_height);
-        RGBA color = m_data[precipImgIndex * m_biomeImg_width + tempImgIndex];
+        SceneColor color = m_data[precipImgIndex * m_biomeImg_width + tempImgIndex];
         m_biomeColors[i] = color;
     }
 }
@@ -724,7 +715,7 @@ bool Realtime::loadImageFromFile(const QString &file) {
     m_data.clear();
     m_data.reserve(m_biomeImg_width * m_biomeImg_height);
     for (int i = 0; i < arr.size() / 4.f; i++){
-        m_data.push_back(RGBA{(std::uint8_t) arr[4*i], (std::uint8_t) arr[4*i+1], (std::uint8_t) arr[4*i+2], (std::uint8_t) arr[4*i+3]});
+        m_data.push_back(SceneColor{(std::uint8_t) arr[4*i], (std::uint8_t) arr[4*i+1], (std::uint8_t) arr[4*i+2], (std::uint8_t) arr[4*i+3]});
     }
     return true;
 }
