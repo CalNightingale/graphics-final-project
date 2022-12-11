@@ -279,6 +279,8 @@ void Realtime::paintSkybox(){
 
     glUniform1i(glGetUniformLocation(m_skybox_shader, "skybox"), 0);
     glUniform1i(glGetUniformLocation(m_skybox_shader, "starTexture"), 1);
+    glUniform1f(glGetUniformLocation(m_skybox_shader, "time"), float(time));
+
 
 
     glUniform1f(glGetUniformLocation(m_skybox_shader, "sunTheta"), sunTheta);

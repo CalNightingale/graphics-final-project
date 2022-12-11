@@ -90,14 +90,22 @@ void main()
     if(sunProx > .9999 && texture(starTexture, texCoords) != vec4(0,0,0,0)){
         FragColor = vec4(1,.5,0,1);
     } else {
-
         FragColor = skyColor;
     }
 
 
 //    FragColor = skyColor;
-    FragColor += texture(skybox, texCoords);
-    FragColor += texture(starTexture, texCoords);
+    if(time < 1000){
+        FragColor += (1 - smoothstep(0, 1000, time)) * texture(starTexture, texCoords);
+          FragColor += (( smoothstep(0, 1000, time) + 0.5) / 1.5f) * texture(skybox, texCoords);
+    }
+    else if(time > 4000){
+        FragColor += smoothstep(4000, 5000, time) * texture(starTexture, texCoords);
+          FragColor += ((1 -  ( smoothstep(4000, 5000, time)) + 0.5) / 1.5f) *texture(skybox, texCoords);
+    }  else {
+        FragColor += texture(skybox, texCoords);
+
+    }
 
 
 
