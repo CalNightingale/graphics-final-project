@@ -5,7 +5,7 @@ class Simplex
 {
 public:
     Simplex();
-    std::vector<std::vector<float>> noiseMap(int size, int res, int seed, int octaves, float persistence=0.5, float lacunarity=2.0);
+    std::vector<std::vector<float>> noiseMap(int size, int res, int seed, int octaves=1, float persistence=0.5, float lacunarity=2.0);
 
 
 private:

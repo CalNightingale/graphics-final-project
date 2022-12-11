@@ -93,4 +93,8 @@ private:
     int m_biomeMap[256][256];
     float m_precipMap[256][256];
     float m_tempMap[256][256];
+    float m_heightMap[256][256];
+
+    void populateMaps();
+
 };

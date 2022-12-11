@@ -6,13 +6,15 @@
 #include <functional>
 #include <glm/glm.hpp>
 
+
+
 class Biome
 {
 public:
     Biome();
     void histogramEqualize(std::vector<std::vector<float>>& noiseMap);
-    std::vector<std::vector<int>> createTemperatureMap(int size, int seed);
-    std::vector<std::vector<int>> createPreciptiationMap(int size, int seed);
+    std::vector<std::vector<float>> createTemperatureMap(int size, int seed);
+    std::vector<std::vector<float>> createPreciptiationMap(int size, int seed);
     std::vector<std::vector<float>> createHeightMap(int size, int seed);
     std::vector<std::vector<float>> createSmoothHeightMap(int size, int seed);
     std::vector<std::vector<float>> createLandMask(int size, int seed);

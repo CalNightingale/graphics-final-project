@@ -14,6 +14,7 @@
 #include "utils/sceneparser.h"
 
 #include "src/voronoi/src/jc_voronoi.h"
+#include "noise/biome.h"
 
 #define GL_SILENCE_DEPRECATION
 
@@ -654,4 +655,19 @@ void Realtime::timerEvent(QTimerEvent *event) {
 
     rebuildMatrices();
     update(); // asks for a PaintGL() call to occur
+}
+
+void Realtime::populateMaps() {
+    Biome biome = Biome();
+    std::vector<std::vector<float>> precMapVector = biome.createPreciptiationMap(256, 0);
+    std::vector<std::vector<float>> tempMapVector = biome.createTemperatureMap(256, 0);
+    std::vector<std::vector<float>> heightMap = biome.createBiomeHeightMap(256, 0, 3);
+
+    for (int i = 0; i < 256; i++) {
+        for (int j = 0; j < 256; j++) {
+            m_precipMap[i][j] = precMapVector[i][j];
+            m_tempMap[i][j] = tempMapVector[i][j];
+            m_heightMap[i][j] = heightMap[i][j];
+        }
+    }
 }

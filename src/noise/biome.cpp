@@ -111,21 +111,21 @@ void Biome::histogramEqualize(std::vector<std::vector<float>>& noiseMap) {
 //    std::cout << std::endl;
 }
 
-std::vector<std::vector<int>> Biome::createTemperatureMap(int size, int seed) {
+std::vector<std::vector<float>> Biome::createTemperatureMap(int size, int seed) {
     std::vector<std::vector<float>> tempMap = simplex.noiseMap(size, 2, seed*2);
     histogramEqualize(tempMap);
-    std::vector<std::vector<int>> outputMap;
+    std::vector<std::vector<float>> outputMap;
     for (auto& row: tempMap) {
-        std::vector<int> outputRow;
+        std::vector<float> outputRow;
         for (auto& value: row) {
-            outputRow.push_back((int)(value * 128.0 + 128.0));
+            outputRow.push_back((value * 0.5 + 0.5));
         }
         outputMap.push_back(outputRow);
     }
     return outputMap;
 }
 
-std::vector<std::vector<int>> Biome::createPreciptiationMap(int size, int seed) {
+std::vector<std::vector<float>> Biome::createPreciptiationMap(int size, int seed) {
     return createTemperatureMap(size, seed + 1);
 }
 
