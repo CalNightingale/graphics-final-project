@@ -16,6 +16,13 @@
 #include <QTime>
 #include <QTimer>
 
+struct RGBA {
+    std::uint8_t r;
+    std::uint8_t g;
+    std::uint8_t b;
+    std::uint8_t a = 255;
+};
+
 class Realtime : public QOpenGLWidget
 {
 public:
@@ -89,7 +96,15 @@ private:
     void populateSceneData();
     void genBiomeShapes();
 
+    // biome mapping stuff
+    bool loadImageFromFile(const QString &file);
+    int m_biomeImg_width;
+    int m_biomeImg_height;
+    std::vector<RGBA> m_data;
+    std::vector<RGBA> m_biomeColors;
+
     void recurseBiomes(int x, int y, int biomeID);
+    void computeBiomeTypes();
     int m_biomeMap[256][256];
     float m_precipMap[256][256];
     float m_tempMap[256][256];
