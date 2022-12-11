@@ -94,6 +94,7 @@ private:
     void computeBlockShapeData();
     void genTestBlockData();
     void populateSceneData();
+    void computeHeightMap();
     void genBiomeShapes();
     void genBlockData();
 
@@ -109,7 +110,7 @@ private:
     int m_biomeMap[256][256];
     float m_precipMap[256][256];
     float m_tempMap[256][256];
-    float m_heightMap[256][256];
+    int m_heightMap[256][256];
 
     void populateMaps();
 

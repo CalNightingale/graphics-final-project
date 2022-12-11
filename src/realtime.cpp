@@ -398,14 +398,15 @@ void Realtime::computeBlockShapeData() {
 void Realtime::genBlockData() {
     m_blockData.clear();
     for (int x = 0; x < settings.renderWidth; x++) {
-        for (int y = 0; y < settings.renderWidth; y++) {
-            int biomeID = m_biomeMap[y][x];
+        for (int z = 0; z < settings.renderWidth; z++) {
+            int biomeID = m_biomeMap[z][x];
+            int height = m_heightMap[z][x];
             SceneColor col = SceneColor{1,1,1,1};
             if (biomeID > -1) {
                 col = m_biomeColors[biomeID];
                 //std::cout << col.r << "," << col.g << "," << col.b << std::endl;
             }
-            m_blockData.push_back(Block{glm::vec3(x, 0, y), col});
+            m_blockData.push_back(Block{glm::vec3(x, height, z), col});
         }
     }
 }
@@ -514,8 +515,21 @@ void Realtime::computeBiomeTypes() {
         float avgPrecip = precipSums[i] / biomeSize[i];
         int tempImgIndex = round(avgTemp * m_biomeImg_width);
         int precipImgIndex = round(avgPrecip * m_biomeImg_height);
-        SceneColor color = m_data[precipImgIndex * m_biomeImg_width + tempImgIndex];
-        m_biomeColors[i] = color;
+        m_biomeColors[i] = m_data[precipImgIndex * m_biomeImg_width + tempImgIndex];
+    }
+}
+
+void Realtime::computeHeightMap() {
+    for (int x = 0; x < settings.renderWidth; x++) {
+        for (int y = 0; y < settings.renderWidth; y++) {
+            int biomeID = m_biomeMap[y][x];
+            SceneColor col = SceneColor{1,1,1,1};
+            if (biomeID > -1) {
+                col = m_biomeColors[biomeID];
+                //std::cout << col.r << "," << col.g << "," << col.b << std::endl;
+            }
+            m_blockData.push_back(Block{glm::vec3(x, 0, y), col});
+        }
     }
 }
 
@@ -696,7 +710,7 @@ void Realtime::populateMaps() {
         for (int j = 0; j < 256; j++) {
             m_precipMap[i][j] = precMapVector[i][j];
             m_tempMap[i][j] = tempMapVector[i][j];
-            m_heightMap[i][j] = heightMap[i][j];
+            m_heightMap[i][j] = round(heightMap[i][j] * settings.maxHeight);
         }
     }
 }
