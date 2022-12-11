@@ -7,6 +7,55 @@
 
 
 
+void loadVectorAsCubemap(GLuint &textureId, std::vector<glm::vec4> mapData, int textureSize){
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    Debug::glErrorCheck();
+
+
+    // to prevent seams
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    Debug::glErrorCheck();
+
+
+
+
+    for (int i = 0; i < 6; i++){
+
+
+        int TEXTURE_SIZE = textureSize;
+
+
+        if (true)
+        {
+            glTexImage2D
+            (
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0,
+                GL_RGBA,
+                TEXTURE_SIZE,
+                TEXTURE_SIZE,
+                0,
+                GL_RGBA,
+                GL_FLOAT,
+                mapData.data()
+            );
+        }
+        else
+        {
+            std::cout << "Failed to load texture: " << std::endl;
+        }
+    }
+
+}
+
+
+
+
 void Realtime::setupSkybox(){
     Debug::glErrorCheck();
 
@@ -104,6 +153,7 @@ void Realtime::setupSkybox(){
 
 
 
+
     for (int i = 0; i < 6; i++){
 
 //        QImage textureImage = QImage(facesCubemap[i]);
@@ -114,13 +164,69 @@ void Realtime::setupSkybox(){
 
         int TEXTURE_SIZE = 100;
 
+        std::vector<glm::vec4> cloudmap{};
+        cloudmap.reserve(TEXTURE_SIZE*TEXTURE_SIZE);
+        for(int i = 0; i < TEXTURE_SIZE*TEXTURE_SIZE; i++){
+            long randNum = random();
+            randNum %= 1000;
+
+            if(randNum < 100){
+                cloudmap.push_back(glm::vec4(1,1,1,1));
+            } else {
+                cloudmap.push_back(glm::vec4(0,0,0,1));
+            }
+        }
+
+        if (true)
+        {
+            glTexImage2D
+            (
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0,
+                GL_RGBA,
+                TEXTURE_SIZE,
+                TEXTURE_SIZE,
+                0,
+                GL_RGBA,
+                GL_FLOAT,
+                cloudmap.data()
+            );
+        }
+        else
+        {
+            std::cout << "Failed to load texture: " << std::endl;
+        }
+    }
+
+
+    glGenTextures(1, &m_starTexture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_starTexture);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    Debug::glErrorCheck();
+
+
+    // to prevent seams
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    Debug::glErrorCheck();
+
+
+
+
+    for (int i = 0; i < 6; i++){
+
+
+        int TEXTURE_SIZE = 1000;
+
         std::vector<glm::vec4> starmap{};
         starmap.reserve(TEXTURE_SIZE*TEXTURE_SIZE);
         for(int i = 0; i < TEXTURE_SIZE*TEXTURE_SIZE; i++){
             long randNum = random();
             randNum %= 1000;
 
-            if(randNum < 100){
+            if(randNum < 10){
                 starmap.push_back(glm::vec4(1,1,1,1));
             } else {
                 starmap.push_back(glm::vec4(0,0,0,1));
@@ -172,6 +278,8 @@ void Realtime::paintSkybox(){
     glUniform3fv(glGetUniformLocation(m_skybox_shader, "lightPos"), 1, &lightPos[0]);
 
     glUniform1i(glGetUniformLocation(m_skybox_shader, "skybox"), 0);
+    glUniform1i(glGetUniformLocation(m_skybox_shader, "starTexture"), 1);
+
 
     glUniform1f(glGetUniformLocation(m_skybox_shader, "sunTheta"), sunTheta);
     glUniform1f(glGetUniformLocation(m_skybox_shader, "sunPhi"), sunPhi);
@@ -182,6 +290,10 @@ void Realtime::paintSkybox(){
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxTexture);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_starTexture);
+
 
 
     glDrawArrays(GL_TRIANGLES, 0, m_verticiesVector.size() / 3);

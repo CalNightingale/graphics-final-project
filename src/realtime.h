@@ -92,6 +92,7 @@ private:
     // some of this isn't used but is still in here
     GLuint m_skyboxVAO, m_skyboxVBO;
     GLuint m_skyboxTexture;
+    GLuint m_starTexture;
     GLuint m_skybox_shader;
     void setupSkybox();
     void paintSkybox();

@@ -4,6 +4,7 @@ out vec4 FragColor;
 in vec3 texCoords;
 
 uniform samplerCube skybox;
+uniform samplerCube starTexture;
 uniform vec4 skyColor;
 uniform vec3 lightPos;
 uniform float time;
@@ -86,7 +87,7 @@ void main()
 //        FragColor = skyColor;
 //    }
 
-    if(sunProx > .9999){
+    if(sunProx > .9999 && texture(starTexture, texCoords) != vec4(0,0,0,0)){
         FragColor = vec4(1,.5,0,1);
     } else {
 
@@ -96,5 +97,8 @@ void main()
 
 //    FragColor = skyColor;
     FragColor += texture(skybox, texCoords);
+    FragColor += texture(starTexture, texCoords);
+
+
 
 }
