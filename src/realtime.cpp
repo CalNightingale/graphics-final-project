@@ -489,6 +489,44 @@ void Realtime::genBiomeShapes() {
     jcv_diagram_free(&diagram);
 }
 
+void Realtime::computeBiomeTypes() {
+    loadImageFromFile("resources/biomeMap.jpg");
+    // create necessary variables
+    int biomeID;
+    float temp;
+    float precip;
+    float tempSums[settings.numBiomes];
+    float precipSums[settings.numBiomes];
+    int biomeSize[settings.numBiomes];
+    // set sums for each biome to 0 to start
+    for (int i = 0; i < settings.numBiomes; i++) {
+        tempSums[i] = 0;
+        precipSums[i] = 0;
+        biomeSize[i] = 0;
+    }
+    // iterate through all blocks, keep track of temp and precip for each biome
+    for (int x = 0; x < settings.renderWidth; x++) {
+        for (int y = 0; y < settings.renderWidth; y++) {
+            biomeID = m_biomeMap[y][x] - 1; // biomeIDs are 1-indexed
+            if (biomeID == -1) continue; // skip edges for now
+            tempSums[biomeID] += m_tempMap[y][x];
+            precipSums[biomeID] += m_precipMap[y][x];
+            biomeSize[biomeID]++;
+        }
+    }
+    // iteate through each biome, compute avg temp and precip, map to biome type
+    m_biomeColors.clear();
+    m_biomeColors.reserve(m_biomeImg_width * m_biomeImg_height);
+    for (int i = 0; i < settings.numBiomes; i++) {
+        float avgTemp = tempSums[i] / biomeSize[i];
+        float avgPrecip = precipSums[i] / biomeSize[i];
+        int tempImgIndex = round(avgTemp * m_biomeImg_width);
+        int precipImgIndex = round(avgPrecip * m_biomeImg_height);
+        RGBA color = m_data[precipImgIndex * m_biomeImg_width + tempImgIndex];
+        m_biomeColors[i] = color;
+    }
+}
+
 // WANT TO MODIFY DEFAULT SETTINGS??? DO SO HERE!!!
 void Realtime::populateSceneData() {
     m_sceneData.cameraData.aperture = 0;
@@ -654,4 +692,23 @@ void Realtime::timerEvent(QTimerEvent *event) {
 
     rebuildMatrices();
     update(); // asks for a PaintGL() call to occur
+}
+
+bool Realtime::loadImageFromFile(const QString &file) {
+    QImage myImage;
+    if (!myImage.load(file)) {
+        std::cout<<"Failed to load in image"<<std::endl;
+        return false;
+    }
+    myImage = myImage.convertToFormat(QImage::Format_RGBX8888);
+    m_biomeImg_width = myImage.width();
+    m_biomeImg_height = myImage.height();
+    QByteArray arr = QByteArray::fromRawData((const char*) myImage.bits(), myImage.sizeInBytes());
+
+    m_data.clear();
+    m_data.reserve(m_biomeImg_width * m_biomeImg_height);
+    for (int i = 0; i < arr.size() / 4.f; i++){
+        m_data.push_back(RGBA{(std::uint8_t) arr[4*i], (std::uint8_t) arr[4*i+1], (std::uint8_t) arr[4*i+2], (std::uint8_t) arr[4*i+3]});
+    }
+    return true;
 }
