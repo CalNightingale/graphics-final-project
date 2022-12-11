@@ -91,4 +91,6 @@ private:
 
     void recurseBiomes(int x, int y, int biomeID);
     int m_biomeMap[256][256];
+    float m_precipMap[256][256];
+    float m_tempMap[256][256];
 };
