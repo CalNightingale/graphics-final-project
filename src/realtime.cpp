@@ -144,6 +144,13 @@ void Realtime::initializeGL() {
     glUseProgram(0);
 
     // Generate terrain
+    populateBoundaryNoise();
+//    for (int i = 0; i < 64; i++) {
+//        for (int j = 0; j < 64; j++) {
+//            std::cout << m_boundaryNoise[i][j].x << "," << m_boundaryNoise[i][j].y << " ";
+//        }
+//        std::cout << std::endl;
+//    }
     populateSceneData();
     settings.farPlane = 1000;
     rebuildMatrices();
