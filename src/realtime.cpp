@@ -440,10 +440,12 @@ void Realtime::genBlockData() {
             }
             // set edges to a neighboring biome
             if (biomeID == -1) biomeID = getNonEdgeNeighborID(x, z);
-            //if (biomeID == -1) std::cout << "COULD NOT FIND NEIGHBOR" << std::endl;
             SceneColor col = m_biomeColors[biomeID];
             // start at top, generate blocks until lower than all surrounding blocks
             int lowestNeighbor = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
+            if (y < lowestNeighbor) {
+                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
+            }
             while (y >= lowestNeighbor) {
                 m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
                 y--;
@@ -452,16 +454,67 @@ void Realtime::genBlockData() {
     }
 }
 
+// Go in all 4 directions until a biome is found, return biome ID with shortest distance traveled
 int Realtime::getNonEdgeNeighborID(int x, int y) {
     std::vector<int> candidates;
-    if (x > 0) candidates.push_back(m_biomeMap[y][x-1]);
-    if (x < settings.renderWidth - 1) candidates.push_back(m_biomeMap[y][x+1]);
-    if (y > 0) candidates.push_back(m_biomeMap[y-1][x]);
-    if (y < settings.renderWidth - 1) candidates.push_back(m_biomeMap[y+1][x]);
-    for (int i = 0; i < candidates.size(); i++) {
-        if (candidates[i] != -1) return candidates[i];
+    std::vector<int> distances;
+    int cur = x + 1;
+    int dist = 1;
+    while (cur < settings.renderWidth) {
+        int candidate = m_biomeMap[y][cur];
+        if (candidate > -1) {
+            candidates.push_back(candidate);
+            distances.push_back(dist);
+            break;
+        }
+        cur++;
+        dist++;
     }
-    return -1;
+
+    cur = x - 1;
+    dist = 1;
+    while (cur > 0) {
+        int candidate = m_biomeMap[y][cur];
+        if (candidate > -1) {
+            candidates.push_back(candidate);
+            distances.push_back(dist);
+            break;
+        }
+        cur--;
+        dist++;
+    }
+
+    cur = y + 1;
+    dist = 1;
+    while (cur < settings.renderWidth) {
+        int candidate = m_biomeMap[cur][x];
+        if (candidate > -1) {
+            candidates.push_back(candidate);
+            distances.push_back(dist);
+            break;
+        }
+        cur++;
+        dist++;
+    }
+
+    cur = y - 1;
+    dist = 1;
+    while (cur > 0) {
+        int candidate = m_biomeMap[cur][x];
+        if (candidate > -1) {
+            candidates.push_back(candidate);
+            distances.push_back(dist);
+            break;
+        }
+        cur--;
+        dist++;
+    }
+
+    int minDist = settings.renderWidth * 2;
+    for (int i = 0; i < candidates.size(); i++) {
+        if (candidates[i] < minDist) minDist = candidates[i];
+    }
+    return minDist;
 }
 
 void Realtime::recurseBiomes(int x, int y, int biomeID) {
