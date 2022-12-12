@@ -16,9 +16,9 @@ struct Settings {
     bool extraCredit3 = false;
     bool extraCredit4 = false;
     int movementSpeed = 10;
-    const int renderWidth = 128;
+    const int renderWidth = 256;
     int numBiomes = 40;
-    int maxHeight = 100;
+    int maxHeight = 40;
 };
 
 

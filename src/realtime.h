@@ -112,12 +112,12 @@ private:
 
     void recurseBiomes(int x, int y, int biomeID);
     void computeBiomeTypes();
-    int m_biomeMap[128][128];
-    float m_precipMap[128][128];
-    float m_tempMap[128][128];
-    int m_heightMap[128][128];
+    int m_biomeMap[256][256];
+    float m_precipMap[256][256];
+    float m_tempMap[256][256];
+    int m_heightMap[256][256];
 
-    float m_multipleHeightMaps[9][128][128];
+    float m_multipleHeightMaps[9][256][256];
 
     void populateMaps();
     void populateHeights();
