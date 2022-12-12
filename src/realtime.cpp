@@ -417,8 +417,8 @@ void Realtime::genBlockData() {
                 col = m_biomeColors[biomeID];
             }
             // start at top, generate blocks until lower than all surrounding blocks
-            int minHeight = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
-            while (y > minHeight) {
+            int lowestNeighbor = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
+            while (y >= lowestNeighbor) {
                 m_blockData.push_back(Block{glm::vec3(x, y, z), col});
                 y--;
             }
