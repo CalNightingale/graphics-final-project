@@ -112,14 +112,15 @@ private:
 
     void recurseBiomes(int x, int y, int biomeID);
     void computeBiomeTypes();
-    int m_biomeMap[256][256];
-    float m_precipMap[256][256];
-    float m_tempMap[256][256];
-    int m_heightMap[256][256];
+    int m_biomeMap[settings.renderWidth][settings.renderWidth];
+    float m_precipMap[settings.renderWidth][settings.renderWidth];
+    float m_tempMap[settings.renderWidth][settings.renderWidth];
+    int m_heightMap[settings.renderWidth][settings.renderWidth];
 
-    float m_multipleHeightMaps[9][256][256];
+    float m_multipleHeightMaps[9][settings.renderWidth][settings.renderWidth];
 
     void populateMaps();
     void populateHeights();
 
+    std::vector<float> vertexData;
 };

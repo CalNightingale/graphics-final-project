@@ -6,5 +6,5 @@
 
 struct Shape {
     RenderShapeData data;
-    std::vector<float> vertexData;
+    glm::mat3 inverseCTM;
 };

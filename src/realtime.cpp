@@ -88,6 +88,8 @@ void Realtime::initializeGL() {
     // gen & bind vbo
     glGenBuffers(1, &m_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+   //computeBlockShapeData();
+
     // gen & bind vao
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
@@ -151,6 +153,12 @@ void Realtime::initializeGL() {
     populateHeights();
     genBlockData();
     computeBlockShapeData();
+
+    Cube cube;
+    cube.updateParams(2);
+    vertexData = cube.generateShape();
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
 }
 
 /**
@@ -293,7 +301,9 @@ void Realtime::paintGeometry() {
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
     glBindVertexArray(m_vao);
     // iterate through each shape in the scene and render it
-    for (const Shape &s : m_shapeData) renderShape(s, ambLoc, diffLoc, specLoc, shineLoc);
+    for (const Shape &s : m_shapeData) {
+        renderShape(s, ambLoc, diffLoc, specLoc, shineLoc);
+    }
 
     // Unbind
     glBindVertexArray(0);
@@ -317,15 +327,20 @@ Shape genShapeFromBlock(const Block &block) {
     SceneColor scaledDiff = SceneColor{block.color.r / 255, block.color.g / 255, block.color.b / 255, 1};
     SceneMaterial mat = SceneMaterial{blockAmbient, scaledDiff, blockSpecular, blockShininess};
     ScenePrimitive prim = ScenePrimitive{PrimitiveType::PRIMITIVE_CUBE, mat};
-    // compute ctm: blocks in this world are all unit sized, simply have to be translated to proper location
-    glm::mat4 ctm = Cube::getTranslationMatrix(block.pos.x, block.pos.y, block.pos.z);
-    RenderShapeData rsd = RenderShapeData{prim, ctm};
-    // generate vertexData
-    Cube cube;
-    cube.updateParams(2, rsd); // IGNORE SETTINGS; USE MINIMAL TESELLATION (its a cube - no difference)
-    std::vector<float> vertexData = cube.generateShape();
+    glm::mat4 ctm = glm::mat4(1.f);
+    ctm[3][0] = block.pos.x;
+    ctm[3][1] = block.pos.y;
+    ctm[3][2] = block.pos.z;
 
-    return Shape{rsd, vertexData};
+    glm::mat4 inverseCTM = glm::inverse(ctm);
+    glm::mat3 inverseTransposeCTM = glm::transpose(glm::mat3(inverseCTM));
+
+    RenderShapeData rsd = RenderShapeData{prim, ctm};
+
+    // generate vertexData
+//    cube.updateParams(2, rsd); // IGNORE SETTINGS; USE MINIMAL TESELLATION (its a cube - no difference)
+
+    return Shape{rsd, inverseTransposeCTM};
 }
 
 // Modified from lab 11
@@ -370,10 +385,13 @@ void Realtime::renderShape(Shape shape, GLint ambLoc, GLint diffLoc, GLint specL
     glUniform4fv(specLoc, 1, &shape.data.primitive.material.cSpecular[0]);
     glUniform1f(shineLoc, shape.data.primitive.material.shininess);
 
-    // set vbo data to current shape
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*shape.vertexData.size(), shape.vertexData.data(), GL_STATIC_DRAW);
+    GLint modelLoc = glGetUniformLocation(m_phong_shader, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &shape.data.ctm[0][0]);
+    GLint itModelLoc = glGetUniformLocation(m_phong_shader, "it_model");
+    glUniformMatrix3fv(itModelLoc, 1, GL_FALSE, &shape.inverseCTM[0][0]);
+
     // draw shape
-    glDrawArrays(GL_TRIANGLES, 0, shape.vertexData.size() / 6);
+    glDrawArrays(GL_TRIANGLES, 0, vertexData.size() / 6);
 }
 
 void Realtime::resizeGL(int w, int h) {
@@ -409,17 +427,17 @@ void Realtime::genBlockData() {
             int y = m_heightMap[z][x];
             // render low points as water
             if (y == 0) {
-                m_blockData.push_back(Block{glm::vec3(x, y, z), SceneColor{0,0,255,1}});
+                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), SceneColor{0,0,255,1}});
                 continue;
             }
-
-            // set edges to a neighboring biome
-            if (biomeID == -1) biomeID = getNonEdgeNeighborID(x, z);
-            SceneColor col = m_biomeColors[biomeID];
+            SceneColor col = SceneColor{1,1,1,1};
+            if (biomeID > -1) {
+                col = m_biomeColors[biomeID];
+            }
             // start at top, generate blocks until lower than all surrounding blocks
             int lowestNeighbor = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
             while (y >= lowestNeighbor) {
-                m_blockData.push_back(Block{glm::vec3(x, y, z), col});
+                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
                 y--;
             }
         }
@@ -500,18 +518,6 @@ void Realtime::genBiomeShapes() {
     jcv_diagram_free(&diagram);
 }
 
-int Realtime::getNonEdgeNeighborID(int x, int y) {
-    std::vector<int> candidates;
-    if (x > 0) candidates.push_back(m_biomeMap[y][x-1]);
-    if (x < settings.renderWidth - 1) candidates.push_back(m_biomeMap[y][x+1]);
-    if (y > 0) candidates.push_back(m_biomeMap[y-1][x]);
-    if (y < settings.renderWidth - 1) candidates.push_back(m_biomeMap[y+1][x]);
-    for (int i = 0; i < candidates.size(); i++) {
-        if (candidates[i] != -1) return candidates[i];
-    }
-    return -1;
-}
-
 void Realtime::computeBiomeTypes() {
     loadImageFromFile("resources/biomeMap.jpg");
     // create necessary variables
@@ -531,10 +537,7 @@ void Realtime::computeBiomeTypes() {
     for (int x = 0; x < settings.renderWidth; x++) {
         for (int y = 0; y < settings.renderWidth; y++) {
             biomeID = m_biomeMap[y][x];
-            // set edges to an adjacent biome chosen at random
-            if (biomeID == -1) {
-                biomeID = getNonEdgeNeighborID(x, y);
-            }
+            if (biomeID == -1) continue; // skip edges for now
             tempSums[biomeID] += m_tempMap[y][x];
             precipSums[biomeID] += m_precipMap[y][x];
             biomeSize[biomeID]++;
@@ -581,7 +584,7 @@ void Realtime::populateSceneData() {
     m_sceneData.cameraData.focalLength = 0;
     m_sceneData.cameraData.heightAngle = 0.523599;
     //TOP DOWN VIEW
-    m_sceneData.cameraData.pos = glm::vec4(255/2, 500, 255/2, 1);
+    m_sceneData.cameraData.pos = glm::vec4(0, settings.maxHeight*5, 0, 1);
     m_sceneData.cameraData.look = glm::vec4(0, -1, 0, 0);
     m_sceneData.cameraData.up = glm::vec4(1, 0, 0, 0);
     /*// SIDE VIEW
