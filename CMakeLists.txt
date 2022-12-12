@@ -51,6 +51,8 @@ add_executable(${PROJECT_NAME}
     src/shapes/Shape.h
     src/block.h
     src/debug.h
+    src/skybox.cpp
+
 
     # voronoi files
     src/voronoi/src/jc_voronoi.h
@@ -94,6 +96,8 @@ qt6_add_resources(${PROJECT_NAME} "Resources"
         resources/shaders/texture.vert
         resources/shaders/phong.frag
         resources/shaders/phong.vert
+        resources/shaders/skybox.frag
+        resources/shaders/skybox.vert
 )
 
 # GLEW: this provides support for Windows (including 64-bit)

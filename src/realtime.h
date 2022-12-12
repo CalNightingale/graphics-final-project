@@ -127,4 +127,27 @@ private:
     int m_seed = 0;
 
     std::vector<float> vertexData;
+
+       // skybox stuff
+    // some of this isn't used but is still in here
+    GLuint m_skyboxVAO, m_skyboxVBO;
+    GLuint m_skyboxTexture;
+    GLuint m_starTexture;
+    GLuint m_skybox_shader;
+    void setupSkybox();
+    void paintSkybox();
+    void updateSkybox();
+    std::vector<float> m_verticiesVector;
+    int dayLength = 5000;
+    int time;
+    glm::vec4 skyColor;
+
+    float sunPhi = -M_PI;
+    float sunTheta = M_PI;
+
+    glm::vec3 lightPos = glm::vec3{0,-1,0};
+
+    glm::vec4 dayColor{13.f / 255.f,174.f / 255.f, 255.f / 255.f, 1};
+    glm::vec4 nightColor{25.f / 255.f, 12.f / 255.f, 59.f / 255.f, 1};
+    glm::vec4 sunsetColor{238.f / 255.f, 175.f / 255.f, 97.f / 255.f, 1};
 };
