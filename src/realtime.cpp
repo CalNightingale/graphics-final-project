@@ -411,10 +411,10 @@ void Realtime::genBlockData() {
                 m_blockData.push_back(Block{glm::vec3(x, y, z), SceneColor{0,0,255,1}});
                 continue;
             }
-            SceneColor col = SceneColor{1,1,1,1};
-            if (biomeID > -1) {
-                col = m_biomeColors[biomeID];
-            }
+
+            // set edges to a neighboring biome
+            if (biomeID == -1) biomeID = getNonEdgeNeighborID(x, z);
+            SceneColor col = m_biomeColors[biomeID];
             // start at top, generate blocks until lower than all surrounding blocks
             int lowestNeighbor = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
             while (y >= lowestNeighbor) {
@@ -499,6 +499,18 @@ void Realtime::genBiomeShapes() {
     jcv_diagram_free(&diagram);
 }
 
+int Realtime::getNonEdgeNeighborID(int x, int y) {
+    std::vector<int> candidates;
+    if (x > 0) candidates.push_back(m_biomeMap[y][x-1]);
+    if (x < settings.renderWidth - 1) candidates.push_back(m_biomeMap[y][x+1]);
+    if (y > 0) candidates.push_back(m_biomeMap[y-1][x]);
+    if (y < settings.renderWidth - 1) candidates.push_back(m_biomeMap[y+1][x]);
+    for (int i = 0; i < candidates.size(); i++) {
+        if (candidates[i] != -1) return candidates[i];
+    }
+    return -1;
+}
+
 void Realtime::computeBiomeTypes() {
     loadImageFromFile("resources/biomeMap.jpg");
     // create necessary variables
@@ -518,7 +530,10 @@ void Realtime::computeBiomeTypes() {
     for (int x = 0; x < settings.renderWidth; x++) {
         for (int y = 0; y < settings.renderWidth; y++) {
             biomeID = m_biomeMap[y][x];
-            if (biomeID == -1) continue; // skip edges for now
+            // set edges to an adjacent biome chosen at random
+            if (biomeID == -1) {
+                biomeID = getNonEdgeNeighborID(x, y);
+            }
             tempSums[biomeID] += m_tempMap[y][x];
             precipSums[biomeID] += m_precipMap[y][x];
             biomeSize[biomeID]++;

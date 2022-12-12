@@ -106,6 +106,7 @@ private:
     std::vector<SceneColor> m_biomeColors;
     std::vector<int> m_biomeTypes;
     int getHeight(int x, int z);
+    int getNonEdgeNeighborID(int x, int y);
 
 
     void recurseBiomes(int x, int y, int biomeID);
