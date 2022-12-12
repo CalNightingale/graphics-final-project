@@ -104,7 +104,9 @@ private:
     int m_biomeImg_height;
     std::vector<SceneColor> m_data;
     std::vector<SceneColor> m_biomeColors;
+    std::vector<int> m_biomeTypes;
     int getHeight(int x, int z);
+
 
     void recurseBiomes(int x, int y, int biomeID);
     void computeBiomeTypes();

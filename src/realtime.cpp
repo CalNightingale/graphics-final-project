@@ -411,9 +411,7 @@ void Realtime::genBlockData() {
                 col = m_biomeColors[biomeID];
             }
             // start at top, generate blocks until lower than all surrounding blocks
-            int minHeight = fmin(getHeight(x, z+1), getHeight(x, z-1));
-            minHeight = fmin(minHeight, getHeight(x-1,z));
-            minHeight = fmin(minHeight, getHeight(x+1,z));
+            int minHeight = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
             while (y > minHeight) {
                 m_blockData.push_back(Block{glm::vec3(x, y, z), col});
                 y--;
@@ -520,13 +518,35 @@ void Realtime::computeBiomeTypes() {
     }
     // iteate through each biome, compute avg temp and precip, map to biome type
     m_biomeColors.clear();
-    m_biomeColors.reserve(m_biomeImg_width * m_biomeImg_height);
+    m_biomeColors.reserve(settings.numBiomes);
+    m_biomeTypes.clear();
+    m_biomeTypes.reserve(settings.numBiomes);
     for (int i = 0; i < settings.numBiomes; i++) {
         float avgTemp = tempSums[i] / biomeSize[i];
         float avgPrecip = precipSums[i] / biomeSize[i];
         int tempImgIndex = round(avgTemp * m_biomeImg_width);
         int precipImgIndex = round(avgPrecip * m_biomeImg_height);
         m_biomeColors[i] = m_data[precipImgIndex * m_biomeImg_width + tempImgIndex];
+        // populate biome types
+        if (m_biomeColors[i].r == 255) { // desert
+            m_biomeTypes[i] = 0;
+        } else if (m_biomeColors[i].r == 184) { // savanna
+            m_biomeTypes[i] = 1;
+        } else if (m_biomeColors[i].r == 188) { // tropical woodland
+            m_biomeTypes[i] = 2;
+        } else if (m_biomeColors[i].r == 189) { // tundra
+            m_biomeTypes[i] = 3;
+        } else if (m_biomeColors[i].r == 107) { // seasonal forest
+            m_biomeTypes[i] = 4;
+        } else if (m_biomeColors[i].r == 31) { // rainforest
+            m_biomeTypes[i] = 5;
+        } else if (m_biomeColors[i].r == 67) { // temperate forest
+            m_biomeTypes[i] = 6;
+        } else if (m_biomeColors[i].r == 35) { // temperate rainforest
+            m_biomeTypes[i] = 7;
+        } else if (m_biomeColors[i].r == 34) { // boreal forest
+            m_biomeTypes[i] = 8;
+        }
     }
 }
 
