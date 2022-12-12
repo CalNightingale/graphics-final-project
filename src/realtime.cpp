@@ -510,10 +510,11 @@ void Realtime::computeBiomeTypes() {
     m_biomeColors.clear();
     m_biomeColors.reserve(m_biomeImg_width * m_biomeImg_height);
     for (int i = 0; i < settings.numBiomes; i++) {
-        float avgTemp = tempSums[i] / biomeSize[i];
-        float avgPrecip = precipSums[i] / biomeSize[i];
+        float avgTemp = tempSums[i] / (biomeSize[i]+1);
+        float avgPrecip = precipSums[i] / (biomeSize[i]+1);
         int tempImgIndex = round(avgTemp * m_biomeImg_width);
         int precipImgIndex = round(avgPrecip * m_biomeImg_height);
+//        std::cout <<  biomeSize[i] << " " << m_biomeImg_height << std::endl;
         SceneColor color = m_data[precipImgIndex * m_biomeImg_width + tempImgIndex];
         m_biomeColors[i] = color;
     }
@@ -690,15 +691,60 @@ void Realtime::populateMaps() {
     Biome biome = Biome();
     std::vector<std::vector<float>> precMapVector = biome.createPreciptiationMap(256, 0);
     std::vector<std::vector<float>> tempMapVector = biome.createTemperatureMap(256, 0);
-    std::vector<std::vector<float>> heightMap = biome.createBiomeHeightMap(256, 0, 3);
+    std::vector<std::vector<std::vector<float>>> heightMaps;
 
     for (int i = 0; i < 256; i++) {
         for (int j = 0; j < 256; j++) {
             m_precipMap[i][j] = precMapVector[i][j];
             m_tempMap[i][j] = tempMapVector[i][j];
-            m_heightMap[i][j] = heightMap[i][j];
         }
     }
+}
+
+
+void Realtime::populateHeights() {
+    Biome biome = Biome();
+
+    std::vector<std::vector<float>> landMask = biome.createLandMask(256, 0);
+    biome.blurMask(landMask);
+
+    std::vector<std::vector<std::vector<float>>> multipleHeightMaps;
+
+    for (int b = 0; b < 9; b++) {
+        std::vector<std::vector<float>> heightMap = biome.createBiomeHeightMap(256, 0, b);
+        multipleHeightMaps.push_back(heightMap);
+    }
+
+    std::vector<std::vector<std::vector<float>>> biomeMasks;
+
+    for (int b = 0; b < 9; b++) {
+        std::vector<std::vector<float>> biomeMask(256, std::vector<float>(256));
+        for (int i = 0; i < 256; i++) {
+            for (int j = 0; j < 256; j++) {
+                if (m_biomeTypes[m_biomeMap[i][j]] == b) { // TODO change
+                    biomeMask[i][j] = 1;
+                }
+            }
+        }
+        biome.blurMask(biomeMask);
+        biomeMasks.push_back(biomeMask);
+    }
+
+    std::vector<std::vector<float>> heightMapAcc(256, std::vector<float>(256));
+
+    for (int b = 0; b < 9; b++) {
+        heightMapAcc = biome.applyMask(heightMapAcc, multipleHeightMaps[b], biomeMasks[b]);
+    }
+
+    std::vector<std::vector<float>> flatMap(256, std::vector<float>(256));
+    heightMapAcc = biome.applyMask(heightMapAcc, flatMap, landMask);
+
+    for (int i = 0; i < 256; i++) {
+        for (int j = 0; j < 256; j++) {
+            m_heightMap[i][j] = heightMapAcc[i][j];
+        }
+    }
+
 }
 
 bool Realtime::loadImageFromFile(const QString &file) {

@@ -111,6 +111,9 @@ private:
     float m_tempMap[256][256];
     float m_heightMap[256][256];
 
+    float m_multipleHeightMaps[9][256][256];
+
     void populateMaps();
+    void populateHeights();
 
 };
