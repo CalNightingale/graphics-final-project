@@ -745,12 +745,12 @@ void Realtime::timerEvent(QTimerEvent *event) {
 
 void Realtime::populateMaps() {
     Biome biome = Biome();
-    std::vector<std::vector<float>> precMapVector = biome.createPreciptiationMap(256, 0);
-    std::vector<std::vector<float>> tempMapVector = biome.createTemperatureMap(256, 0);
+    std::vector<std::vector<float>> precMapVector = biome.createPreciptiationMap(settings.renderWidth, 0);
+    std::vector<std::vector<float>> tempMapVector = biome.createTemperatureMap(settings.renderWidth, 0);
     std::vector<std::vector<std::vector<float>>> heightMaps;
 
-    for (int i = 0; i < 256; i++) {
-        for (int j = 0; j < 256; j++) {
+    for (int i = 0; i < settings.renderWidth; i++) {
+        for (int j = 0; j < settings.renderWidth; j++) {
             m_precipMap[i][j] = precMapVector[i][j];
             m_tempMap[i][j] = tempMapVector[i][j];
         }
@@ -760,22 +760,22 @@ void Realtime::populateMaps() {
 void Realtime::populateHeights() {
     Biome biome = Biome();
 
-    std::vector<std::vector<float>> landMask = biome.createLandMask(256, 0);
+    std::vector<std::vector<float>> landMask = biome.createLandMask(settings.renderWidth, 0);
     biome.blurMask(landMask);
 
     std::vector<std::vector<std::vector<float>>> multipleHeightMaps;
 
     for (int b = 0; b < 9; b++) {
-        std::vector<std::vector<float>> heightMap = biome.createBiomeHeightMap(256, 0, b);
+        std::vector<std::vector<float>> heightMap = biome.createBiomeHeightMap(settings.renderWidth, 0, b);
         multipleHeightMaps.push_back(heightMap);
     }
 
     std::vector<std::vector<std::vector<float>>> biomeMasks;
 
     for (int b = 0; b < 9; b++) {
-        std::vector<std::vector<float>> biomeMask(256, std::vector<float>(256));
-        for (int i = 0; i < 256; i++) {
-            for (int j = 0; j < 256; j++) {
+        std::vector<std::vector<float>> biomeMask(settings.renderWidth, std::vector<float>(settings.renderWidth));
+        for (int i = 0; i < settings.renderWidth; i++) {
+            for (int j = 0; j < settings.renderWidth; j++) {
                 if (m_biomeTypes[m_biomeMap[i][j]] == b) { // TODO change
                     biomeMask[i][j] = 1;
                 }
@@ -785,17 +785,17 @@ void Realtime::populateHeights() {
         biomeMasks.push_back(biomeMask);
     }
 
-    std::vector<std::vector<float>> heightMapAcc(256, std::vector<float>(256));
+    std::vector<std::vector<float>> heightMapAcc(settings.renderWidth, std::vector<float>(settings.renderWidth));
 
     for (int b = 0; b < 9; b++) {
         heightMapAcc = biome.applyMask(heightMapAcc, multipleHeightMaps[b], biomeMasks[b]);
     }
 
-    std::vector<std::vector<float>> flatMap(256, std::vector<float>(256));
-    heightMapAcc = biome.createBiomeHeightMap(256, 0, 3);// biome.applyMask(heightMapAcc, flatMap, landMask);
+//    std::vector<std::vector<float>> flatMap(settings.renderWidth, std::vector<float>(settings.renderWidth));
+//    biome.applyMask(heightMapAcc, flatMap, landMask);
 
-    for (int i = 0; i < 256; i++) {
-        for (int j = 0; j < 256; j++) {
+    for (int i = 0; i < settings.renderWidth; i++) {
+        for (int j = 0; j < settings.renderWidth; j++) {
             m_heightMap[i][j] = round(settings.maxHeight * heightMapAcc[i][j]);
         }
     }
