@@ -291,7 +291,7 @@ std::vector<std::vector<float>> Biome::createBiomeHeightMap(int size, int seed, 
         x1 = 0.33; y1 = 0.33; x2 = 0.95; y2 = 0.1; a = 0.1; b = 0.75;
         break;
         case 3: // Tundra
-        x1 = 0.5; y1 = 1.0; x2 = 0.25; y2 = 1.0; a = 1.0; b = 1.0;
+        x1 = 0.5; y1 = 1.0; x2 = 0.25; y2 = 1.0; a = 1.0; b = 0.5;
         break;
         case 4: // Seasonal Forest
         x1 = 0.75; y1 = 0.5; x2 = 0.4; y2 = 0.4; a = 0.33; b = 0.2;

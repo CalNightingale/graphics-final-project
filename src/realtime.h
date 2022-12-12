@@ -124,5 +124,7 @@ private:
     void populateHeights();
     void populateBoundaryNoise();
 
+    int m_seed = 0;
+
     std::vector<float> vertexData;
 };

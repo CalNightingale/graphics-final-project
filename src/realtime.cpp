@@ -145,12 +145,6 @@ void Realtime::initializeGL() {
 
     // Generate terrain
     populateBoundaryNoise();
-//    for (int i = 0; i < 64; i++) {
-//        for (int j = 0; j < 64; j++) {
-//            std::cout << m_boundaryNoise[i][j].x << "," << m_boundaryNoise[i][j].y << " ";
-//        }
-//        std::cout << std::endl;
-//    }
     populateSceneData();
     settings.farPlane = 1000;
     rebuildMatrices();
@@ -491,7 +485,7 @@ void Realtime::genBiomeShapes() {
 
     // TODO ONCE FINISHED, USE time(NULL). Till then use 0 for testing - it will always gen the same diagram
     // srand(time(NULL));
-    srand(0);
+    srand(m_seed);
 
     // Generate center point for each biome
     for (int i = 0; i < settings.numBiomes; i++) {
@@ -650,7 +644,15 @@ void Realtime::sceneChanged() {
 }
 
 void Realtime::settingsChanged() {
-    rebuildMatrices();
+    computeBlockShapeData();
+    m_seed = settings.shapeParameter1;
+    populateBoundaryNoise();
+    settings.farPlane = 1000;
+    genBiomeShapes();
+    populateMaps();
+    computeBiomeTypes();
+    populateHeights();
+    genBlockData();
     computeBlockShapeData();
     update(); // asks for a PaintGL() call to occur
 }
@@ -789,8 +791,8 @@ void Realtime::timerEvent(QTimerEvent *event) {
 
 void Realtime::populateMaps() {
     Biome biome = Biome();
-    std::vector<std::vector<float>> precMapVector = biome.createPreciptiationMap(settings.renderWidth, 0);
-    std::vector<std::vector<float>> tempMapVector = biome.createTemperatureMap(settings.renderWidth, 0);
+    std::vector<std::vector<float>> precMapVector = biome.createPreciptiationMap(settings.renderWidth,  m_seed);
+    std::vector<std::vector<float>> tempMapVector = biome.createTemperatureMap(settings.renderWidth,  m_seed);
     std::vector<std::vector<std::vector<float>>> heightMaps;
 
     for (int i = 0; i < settings.renderWidth; i++) {
@@ -804,13 +806,13 @@ void Realtime::populateMaps() {
 void Realtime::populateHeights() {
     Biome biome = Biome();
 
-    std::vector<std::vector<float>> landMask = biome.createLandMask(settings.renderWidth, 0);
+    std::vector<std::vector<float>> landMask = biome.createLandMask(settings.renderWidth, m_seed);
     biome.blurMask(landMask);
 
     std::vector<std::vector<std::vector<float>>> multipleHeightMaps;
 
     for (int b = 0; b < 9; b++) {
-        std::vector<std::vector<float>> heightMap = biome.createBiomeHeightMap(settings.renderWidth, 0, b);
+        std::vector<std::vector<float>> heightMap = biome.createBiomeHeightMap(settings.renderWidth, m_seed, b);
         multipleHeightMaps.push_back(heightMap);
     }
 
@@ -868,8 +870,8 @@ bool Realtime::loadImageFromFile(const QString &file) {
 
 void Realtime::populateBoundaryNoise() {
     Simplex simplex = Simplex();
-    std::vector<std::vector<float>> boundaryNoiseX = simplex.noiseMap(settings.renderWidth, 32, 123, 8);
-    std::vector<std::vector<float>> boundaryNoiseY = simplex.noiseMap(settings.renderWidth, 32, 456, 8);
+    std::vector<std::vector<float>> boundaryNoiseX = simplex.noiseMap(settings.renderWidth, 32, m_seed + 123, 8);
+    std::vector<std::vector<float>> boundaryNoiseY = simplex.noiseMap(settings.renderWidth, 32, m_seed + 456, 8);
     for (int i = 0; i < settings.renderWidth; i++) {
         for (int j = 0; j < settings.renderWidth; j++) {
             m_boundaryNoise[i][j] = glm::vec2(i, j) + settings.boundaryDisplacement * glm::vec2(boundaryNoiseX[i][j], boundaryNoiseY[i][j]);
