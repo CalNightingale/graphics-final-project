@@ -94,6 +94,7 @@ private:
     void computeBlockShapeData();
     void genTestBlockData();
     void populateSceneData();
+    void computeHeightMap();
     void genBiomeShapes();
     void genBlockData();
 
@@ -103,13 +104,16 @@ private:
     int m_biomeImg_height;
     std::vector<SceneColor> m_data;
     std::vector<SceneColor> m_biomeColors;
+    std::vector<int> m_biomeTypes;
+    int getHeight(int x, int z);
+
 
     void recurseBiomes(int x, int y, int biomeID);
     void computeBiomeTypes();
     int m_biomeMap[256][256];
     float m_precipMap[256][256];
     float m_tempMap[256][256];
-    float m_heightMap[256][256];
+    int m_heightMap[256][256];
 
     float m_multipleHeightMaps[9][256][256];
 

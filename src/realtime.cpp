@@ -148,6 +148,7 @@ void Realtime::initializeGL() {
     genBiomeShapes();
     populateMaps();
     computeBiomeTypes();
+    populateHeights();
     genBlockData();
     computeBlockShapeData();
 }
@@ -395,17 +396,27 @@ void Realtime::computeBlockShapeData() {
     }
 }
 
+int Realtime::getHeight(int x, int z) {
+    if (x >= 0 && x < settings.renderWidth && z >= 0 && z < settings.renderWidth) return m_heightMap[z][x];
+    return 0;
+}
+
 void Realtime::genBlockData() {
     m_blockData.clear();
     for (int x = 0; x < settings.renderWidth; x++) {
-        for (int y = 0; y < settings.renderWidth; y++) {
-            int biomeID = m_biomeMap[y][x];
+        for (int z = 0; z < settings.renderWidth; z++) {
+            int biomeID = m_biomeMap[z][x];
+            int y = m_heightMap[z][x];
             SceneColor col = SceneColor{1,1,1,1};
             if (biomeID > -1) {
                 col = m_biomeColors[biomeID];
-                //std::cout << col.r << "," << col.g << "," << col.b << std::endl;
             }
-            m_blockData.push_back(Block{glm::vec3(x, 0, y), col});
+            // start at top, generate blocks until lower than all surrounding blocks
+            int minHeight = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
+            while (y > minHeight) {
+                m_blockData.push_back(Block{glm::vec3(x, y, z), col});
+                y--;
+            }
         }
     }
 }
@@ -508,15 +519,50 @@ void Realtime::computeBiomeTypes() {
     }
     // iteate through each biome, compute avg temp and precip, map to biome type
     m_biomeColors.clear();
-    m_biomeColors.reserve(m_biomeImg_width * m_biomeImg_height);
+    m_biomeColors.reserve(settings.numBiomes);
+    m_biomeTypes.clear();
+    m_biomeTypes.reserve(settings.numBiomes);
     for (int i = 0; i < settings.numBiomes; i++) {
         float avgTemp = tempSums[i] / (biomeSize[i]+1);
         float avgPrecip = precipSums[i] / (biomeSize[i]+1);
         int tempImgIndex = round(avgTemp * m_biomeImg_width);
         int precipImgIndex = round(avgPrecip * m_biomeImg_height);
-//        std::cout <<  biomeSize[i] << " " << m_biomeImg_height << std::endl;
-        SceneColor color = m_data[precipImgIndex * m_biomeImg_width + tempImgIndex];
-        m_biomeColors[i] = color;
+
+        m_biomeColors[i] = m_data[precipImgIndex * m_biomeImg_width + tempImgIndex];
+        // populate biome types
+        if (m_biomeColors[i].r == 255) { // desert
+            m_biomeTypes[i] = 0;
+        } else if (m_biomeColors[i].r == 184) { // savanna
+            m_biomeTypes[i] = 1;
+        } else if (m_biomeColors[i].r == 188) { // tropical woodland
+            m_biomeTypes[i] = 2;
+        } else if (m_biomeColors[i].r == 189) { // tundra
+            m_biomeTypes[i] = 3;
+        } else if (m_biomeColors[i].r == 107) { // seasonal forest
+            m_biomeTypes[i] = 4;
+        } else if (m_biomeColors[i].r == 31) { // rainforest
+            m_biomeTypes[i] = 5;
+        } else if (m_biomeColors[i].r == 67) { // temperate forest
+            m_biomeTypes[i] = 6;
+        } else if (m_biomeColors[i].r == 35) { // temperate rainforest
+            m_biomeTypes[i] = 7;
+        } else if (m_biomeColors[i].r == 34) { // boreal forest
+            m_biomeTypes[i] = 8;
+        }
+    }
+}
+
+void Realtime::computeHeightMap() {
+    for (int x = 0; x < settings.renderWidth; x++) {
+        for (int y = 0; y < settings.renderWidth; y++) {
+            int biomeID = m_biomeMap[y][x];
+            SceneColor col = SceneColor{1,1,1,1};
+            if (biomeID > -1) {
+                col = m_biomeColors[biomeID];
+                //std::cout << col.r << "," << col.g << "," << col.b << std::endl;
+            }
+            m_blockData.push_back(Block{glm::vec3(x, 0, y), col});
+        }
     }
 }
 
@@ -701,7 +747,6 @@ void Realtime::populateMaps() {
     }
 }
 
-
 void Realtime::populateHeights() {
     Biome biome = Biome();
 
@@ -726,7 +771,7 @@ void Realtime::populateHeights() {
                 }
             }
         }
-        biome.blurMask(biomeMask);
+        //biome.blurMask(biomeMask);
         biomeMasks.push_back(biomeMask);
     }
 
@@ -737,13 +782,14 @@ void Realtime::populateHeights() {
     }
 
     std::vector<std::vector<float>> flatMap(256, std::vector<float>(256));
-    heightMapAcc = biome.applyMask(heightMapAcc, flatMap, landMask);
+    heightMapAcc = biome.createBiomeHeightMap(256, 0, 3);// biome.applyMask(heightMapAcc, flatMap, landMask);
 
     for (int i = 0; i < 256; i++) {
         for (int j = 0; j < 256; j++) {
-            m_heightMap[i][j] = heightMapAcc[i][j];
+            m_heightMap[i][j] = round(settings.maxHeight * heightMapAcc[i][j]);
         }
     }
+
 
 }
 
