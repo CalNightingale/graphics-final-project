@@ -407,6 +407,11 @@ void Realtime::genBlockData() {
         for (int z = 0; z < settings.renderWidth; z++) {
             int biomeID = m_biomeMap[z][x];
             int y = m_heightMap[z][x];
+            // render low points as water
+            if (y == 0) {
+                m_blockData.push_back(Block{glm::vec3(x, y, z), SceneColor{0,0,255,1}});
+                continue;
+            }
             SceneColor col = SceneColor{1,1,1,1};
             if (biomeID > -1) {
                 col = m_biomeColors[biomeID];
@@ -571,9 +576,14 @@ void Realtime::populateSceneData() {
     m_sceneData.cameraData.aperture = 0;
     m_sceneData.cameraData.focalLength = 0;
     m_sceneData.cameraData.heightAngle = 0.523599;
+    //TOP DOWN VIEW
     m_sceneData.cameraData.pos = glm::vec4(255/2, 500, 255/2, 1);
     m_sceneData.cameraData.look = glm::vec4(0, -1, 0, 0);
     m_sceneData.cameraData.up = glm::vec4(1, 0, 0, 0);
+    /*// SIDE VIEW
+    m_sceneData.cameraData.pos = glm::vec4(255/2, 0, 255/2, 1);
+    m_sceneData.cameraData.look = glm::vec4(1, 0, 0, 0);
+    m_sceneData.cameraData.up = glm::vec4(0, 1, 0, 0);*/
 
     m_sceneData.globalData.ka = 0.2;
     m_sceneData.globalData.kd = 0.5;
