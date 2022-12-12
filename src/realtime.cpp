@@ -428,7 +428,7 @@ void Realtime::genBlockData() {
 
 void Realtime::recurseBiomes(int x, int y, int biomeID) {
     if (x < 0 || y < 0 || x > 255 || y > 255) return; // OB point
-    if (m_biomeMap[y][x] != 0) return; // edge OR already checked
+    if (m_biomeMap[y][x] >= -1) return; // edge OR already checked
 
     m_biomeMap[y][x] = biomeID; // set biomeID
 
@@ -441,7 +441,11 @@ void Realtime::recurseBiomes(int x, int y, int biomeID) {
 // Use voronoi library to create the biomes we're after
 void Realtime::genBiomeShapes() {
     // Initialize necessary variables
-    memset(m_biomeMap, 0, sizeof(m_biomeMap));
+    for (int x = 0; x < settings.renderWidth; x++) {
+        for (int y = 0; y < settings.renderWidth; y++) {
+            m_biomeMap[y][x] = -10;
+        }
+    }
     jcv_point points[settings.numBiomes];
     const jcv_site* sites;
     jcv_graphedge* graph_edge;
@@ -481,7 +485,6 @@ void Realtime::genBiomeShapes() {
               int x = round((1-t)*startX + t*endX);
               int y = round((1-t)*startY + t*endY);
               if (x == lastX && y == lastY) continue; // do not render repeats
-              //m_blockData.push_back(Block{glm::vec3(x,0,y), Snow}); // COMMENT OUT TO AVOID RENDERING EDGES
               m_biomeMap[y][x] = -1; // record this coordinate as the edge
               lastX = x;
               lastY = y;
@@ -490,7 +493,7 @@ void Realtime::genBiomeShapes() {
       }
       int centX = round(sites[i].p.x);
       int centY = round(sites[i].p.y);
-      recurseBiomes(centX, centY, sites[i].index + 1);
+      recurseBiomes(centX, centY, sites[i].index);
     }
 
     // Free the diagram's memory once done
@@ -515,7 +518,7 @@ void Realtime::computeBiomeTypes() {
     // iterate through all blocks, keep track of temp and precip for each biome
     for (int x = 0; x < settings.renderWidth; x++) {
         for (int y = 0; y < settings.renderWidth; y++) {
-            biomeID = m_biomeMap[y][x] - 1; // biomeIDs are 1-indexed
+            biomeID = m_biomeMap[y][x];
             if (biomeID == -1) continue; // skip edges for now
             tempSums[biomeID] += m_tempMap[y][x];
             precipSums[biomeID] += m_precipMap[y][x];
@@ -553,20 +556,6 @@ void Realtime::computeBiomeTypes() {
             m_biomeTypes[i] = 7;
         } else if (m_biomeColors[i].r == 34) { // boreal forest
             m_biomeTypes[i] = 8;
-        }
-    }
-}
-
-void Realtime::computeHeightMap() {
-    for (int x = 0; x < settings.renderWidth; x++) {
-        for (int y = 0; y < settings.renderWidth; y++) {
-            int biomeID = m_biomeMap[y][x];
-            SceneColor col = SceneColor{1,1,1,1};
-            if (biomeID > -1) {
-                col = m_biomeColors[biomeID];
-                //std::cout << col.r << "," << col.g << "," << col.b << std::endl;
-            }
-            m_blockData.push_back(Block{glm::vec3(x, 0, y), col});
         }
     }
 }
