@@ -277,17 +277,18 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
 void Realtime::paintGL() {
     // Students: anything requiring OpenGL calls every frame should be done here
     // Task 24: Bind FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+    //glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
     // Task 28: Call glViewport
+    glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     glViewport(0, 0, m_fbo_width, m_fbo_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     paintGeometry();
     // Task 25: Bind the default framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
+    //glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     // Task 26: Clear the color and depth buffers
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Task 27: Call paintTexture to draw our FBO color attachment texture
-    paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
+    //paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
 }
 
 // modified from lab 11's paintExampleGeometry() method
@@ -788,7 +789,7 @@ void Realtime::populateHeights() {
                 }
             }
         }
-        //biome.blurMask(biomeMask);
+        biome.blurMask(biomeMask);
         biomeMasks.push_back(biomeMask);
     }
 
