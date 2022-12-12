@@ -699,6 +699,9 @@ void Realtime::sceneChanged() {
 void Realtime::settingsChanged() {
     computeBlockShapeData();
     m_seed = settings.shapeParameter1;
+    srand(m_seed);
+    settings.numBiomes = fmax(1, settings.shapeParameter2);
+    settings.maxHeight = settings.shapeParameter3;
     populateBoundaryNoise();
     settings.farPlane = 1000;
     genBiomeShapes();
