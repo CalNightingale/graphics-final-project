@@ -440,6 +440,7 @@ void Realtime::genBlockData() {
             }
             // set edges to a neighboring biome
             if (biomeID == -1) biomeID = getNonEdgeNeighborID(x, z);
+            //if (biomeID == -1) std::cout << "COULD NOT FIND NEIGHBOR" << std::endl;
             SceneColor col = m_biomeColors[biomeID];
             // start at top, generate blocks until lower than all surrounding blocks
             int lowestNeighbor = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
@@ -505,7 +506,6 @@ void Realtime::genBiomeShapes() {
 
     // Iterate through edges and draw
     sites = jcv_diagram_get_sites(&diagram);
-    m_blockData.clear();
     for (int i=0; i<diagram.numsites; i++) {
       graph_edge = sites[i].edges;
       while (graph_edge) {
@@ -535,6 +535,22 @@ void Realtime::genBiomeShapes() {
 
     // Free the diagram's memory once done
     jcv_diagram_free(&diagram);
+
+    // blur the biome edges
+    int blurredMap[settings.renderWidth][settings.renderWidth];
+    for (int x = 0; x < settings.renderWidth; x++) {
+        for (int y = 0; y < settings.renderWidth; y++) {
+            int i = (int)m_boundaryNoise[y][x].x;
+            int j = (int)m_boundaryNoise[y][x].y;
+            blurredMap[y][x] = m_biomeMap[i][j]; // MAY NEED TO SWITCH THIS i,j
+        }
+    }
+    // replace biomeMap with blurred map
+    for (int x = 0; x < settings.renderWidth; x++) {
+        for (int y = 0; y < settings.renderWidth; y++) {
+            m_biomeMap[y][x] = blurredMap[y][x];
+        }
+    }
 }
 
 void Realtime::computeBiomeTypes() {
