@@ -890,16 +890,14 @@ void Realtime::populateHeights() {
         heightMapAcc = biome.applyMask(heightMapAcc, multipleHeightMaps[b], biomeMasks[b]);
     }
 
-//    std::vector<std::vector<float>> flatMap(settings.renderWidth, std::vector<float>(settings.renderWidth));
-//    biome.applyMask(heightMapAcc, flatMap, landMask);
+    std::vector<std::vector<float>> flatMap(settings.renderWidth, std::vector<float>(settings.renderWidth));
+    biome.applyMask(heightMapAcc, flatMap, landMask);
 
     for (int i = 0; i < settings.renderWidth; i++) {
         for (int j = 0; j < settings.renderWidth; j++) {
             m_heightMap[i][j] = round(settings.maxHeight * heightMapAcc[i][j]);
         }
     }
-
-
 }
 
 bool Realtime::loadImageFromFile(const QString &file) {
