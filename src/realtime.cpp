@@ -842,3 +842,15 @@ bool Realtime::loadImageFromFile(const QString &file) {
     }
     return true;
 }
+
+void Realtime::populateBoundaryNoise() {
+    Simplex simplex = Simplex();
+    std::vector<std::vector<float>> boundaryNoiseX = simplex.noiseMap(settings.renderWidth, 32, 123, 8);
+    std::vector<std::vector<float>> boundaryNoiseY = simplex.noiseMap(settings.renderWidth, 32, 456, 8);
+    for (int i = 0; i < settings.renderWidth; i++) {
+        for (int j = 0; j < settings.renderWidth; j++) {
+            m_boundaryNoise[i][j] = glm::vec2(i, j) + settings.boundaryDisplacement * glm::vec2(boundaryNoiseX[i][j], boundaryNoiseY[i][j]);
+            m_boundaryNoise[i][j] = glm::clamp(m_boundaryNoise[i][j], 0.0f, (float)settings.renderWidth-1);
+        }
+    }
+}

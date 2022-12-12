@@ -118,9 +118,11 @@ private:
     int m_heightMap[settings.renderWidth][settings.renderWidth];
 
     float m_multipleHeightMaps[9][settings.renderWidth][settings.renderWidth];
+    glm::vec2 m_boundaryNoise[settings.renderWidth][settings.renderWidth];
 
     void populateMaps();
     void populateHeights();
+    void populateBoundaryNoise();
 
     std::vector<float> vertexData;
 };

@@ -19,6 +19,7 @@ struct Settings {
     static constexpr int renderWidth = 256;
     int numBiomes = 40;
     int maxHeight = 100;
+    float boundaryDisplacement = 8;
 };
 
 
