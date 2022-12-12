@@ -18,7 +18,7 @@ struct Settings {
     int movementSpeed = 20;
     static constexpr int renderWidth = 256;
     int numBiomes = 40;
-    int maxHeight = 40;
+    int maxHeight = 100;
 };
 
 
