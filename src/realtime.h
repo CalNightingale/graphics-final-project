@@ -151,7 +151,9 @@ private:
     glm::vec4 nightColor{25.f / 255.f, 12.f / 255.f, 59.f / 255.f, 1};
     glm::vec4 sunsetColor{238.f / 255.f, 175.f / 255.f, 97.f / 255.f, 1};
 
-
+    std::vector<float> tempSums;
+    std::vector<float> precipSums;
+    std::vector<int> biomeSize;
 
     float marvelRotationAngle = 0.0;
     void marvelBeauty();

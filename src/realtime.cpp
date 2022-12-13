@@ -4,17 +4,14 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <iostream>
-#include "glm/gtx/string_cast.hpp"
 #include "settings.h"
 #include "./utils/shaderloader.h"
-#include "shapes/cone.h"
 #include "shapes/cube.h"
-#include "shapes/cylinder.h"
-#include "shapes/sphere.h"
 #include "utils/sceneparser.h"
 
 #include "src/voronoi/src/jc_voronoi.h"
 #include "noise/biome.h"
+#include <random>
 
 #define GL_SILENCE_DEPRECATION
 
@@ -206,7 +203,8 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, &m_proj[0][0]);
 
     GLint cameraPosLoc = glGetUniformLocation(m_phong_shader, "cameraPos");
-    glm::vec4 cameraPos = inverse(m_view) * glm::vec4(0,0,0,1);
+    // glm::vec4 cameraPos = inverse(m_view) * glm::vec4(0,0,0,1);
+    glm::vec4 cameraPos = glm::vec4(0,0,0,1); // TODO which one?
     glUniform3fv(cameraPosLoc, 1, &cameraPos[0]);
 
     GLint toonCountLocation = glGetUniformLocation(m_phong_shader, "toonCount");
@@ -675,12 +673,15 @@ void Realtime::genBiomeShapes() {
 
     // TODO ONCE FINISHED, USE time(NULL). Till then use 0 for testing - it will always gen the same diagram
     // srand(time(NULL));
-    srand(m_seed);
+    //srand(m_seed);
+
+    std::mt19937 e2(m_seed);
+    std::uniform_real_distribution<> dist(0, 1);
 
     // Generate center point for each biome
     for (int i = 0; i < settings.numBiomes; i++) {
-      points[i].x = round((float)(rand()/(1.0f + RAND_MAX) * settings.renderWidth));
-      points[i].y = round((float)(rand()/(1.0f + RAND_MAX) * settings.renderWidth));
+      points[i].x = round((float)(dist(e2) * settings.renderWidth));
+      points[i].y = round((float)(dist(e2) * settings.renderWidth));
     }
 
     // Create voronoi diagram using the points
@@ -701,10 +702,13 @@ void Realtime::genBiomeShapes() {
           int lastX = -1;
           int lastY = -1;
           // parameterize edge with t and iterate over it
-          float stepsize = 0.001;
-          for (float t = 0; t < 1; t += stepsize) {
-              int x = round((1-t)*startX + t*endX);
-              int y = round((1-t)*startY + t*endY);
+          //float stepsize = 0.001;
+          float nSteps = 1000;
+          //for (float t = 0; t < 1; t += stepsize) {
+          for (int t = 0; t < nSteps; t += 1) {
+              float tStep = (float)t / nSteps;
+              int x = round((1-tStep)*startX + tStep*endX);
+              int y = round((1-tStep)*startY + tStep*endY);
               if (x == lastX && y == lastY) continue; // do not render repeats
               m_biomeMap[y][x] = -1; // record this coordinate as the edge
               lastX = x;
@@ -740,19 +744,19 @@ void Realtime::genBiomeShapes() {
 
 
 void Realtime::computeBiomeTypes() {
-    loadImageFromFile("/Users/handoheon/Desktop/CS1230/FP-file/graphics-final-project/resources/biomeMap.jpg");
+    loadImageFromFile("/Users/handoheon/Desktop/CS1230/FP-file/graphics-final-project/resources/biome_image.png");
     // create necessary variables
     int biomeID;
     float temp;
     float precip;
-    float tempSums[settings.numBiomes];
-    float precipSums[settings.numBiomes];
-    int biomeSize[settings.numBiomes];
+    tempSums.clear();
+    precipSums.clear();
+    biomeSize.clear();
     // set sums for each biome to 0 to start
     for (int i = 0; i < settings.numBiomes; i++) {
-        tempSums[i] = 0;
-        precipSums[i] = 0;
-        biomeSize[i] = 0;
+        tempSums.push_back(0);
+        precipSums.push_back(0);
+        biomeSize.push_back(0);
     }
     // iterate through all blocks, keep track of temp and precip for each biome
     for (int x = 0; x < settings.renderWidth; x++) {
@@ -785,17 +789,17 @@ void Realtime::computeBiomeTypes() {
             m_biomeTypes[i] = 1;
         } else if (m_biomeColors[i].r == 188) { // tropical woodland
             m_biomeTypes[i] = 2;
-        } else if (m_biomeColors[i].r == 189) { // tundra
+        } else if (m_biomeColors[i].r == 190) { // tundra
             m_biomeTypes[i] = 3;
-        } else if (m_biomeColors[i].r == 107) { // seasonal forest
+        } else if (m_biomeColors[i].r == 106) { // seasonal forest
             m_biomeTypes[i] = 4;
-        } else if (m_biomeColors[i].r == 31) { // rainforest
+        } else if (m_biomeColors[i].r == 33) { // rainforest
             m_biomeTypes[i] = 5;
-        } else if (m_biomeColors[i].r == 67) { // temperate forest
+        } else if (m_biomeColors[i].r == 86) { // temperate forest
             m_biomeTypes[i] = 6;
-        } else if (m_biomeColors[i].r == 35) { // temperate rainforest
+        } else if (m_biomeColors[i].r == 34) { // temperate rainforest
             m_biomeTypes[i] = 7;
-        } else if (m_biomeColors[i].r == 34) { // boreal forest
+        } else if (m_biomeColors[i].r == 35) { // boreal forest
             m_biomeTypes[i] = 8;
         }
     }
