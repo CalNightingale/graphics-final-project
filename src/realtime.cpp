@@ -683,7 +683,7 @@ void Realtime::populateSceneData() {
 
     // create a directional light (simulate the sun being the light source)
     m_sceneData.lights.clear();
-    SceneLightData light = SceneLightData{0, LightType::LIGHT_DIRECTIONAL, SceneColor{1,1,1,1}, glm::vec3(1,0,0), glm::vec4(3,3,3,1), glm::vec4(-2,-4,-6,0), 0, 0, 0, 0};
+    SceneLightData light = SceneLightData{0, LightType::LIGHT_POINT, SceneColor{1,1,1,1}, glm::vec3(1,0,0), glm::vec4(settings.renderWidth/4,settings.maxHeight*2,-settings.renderWidth/4,1)};
     m_sceneData.lights.push_back(light);
 }
 
