@@ -225,8 +225,8 @@ void MainWindow::initialize() {
     vLayout->addWidget(p2Layout);
     vLayout->addWidget(param3_label);
     vLayout->addWidget(p3Layout);
-    vLayout->addWidget(param4_label);
-    vLayout->addWidget(p4Layout);
+//    vLayout->addWidget(param4_label);
+//    vLayout->addWidget(p4Layout);
     vLayout->addWidget(param5_label);
     vLayout->addWidget(p5Layout);
 //    vLayout->addWidget(camera_label);
@@ -250,7 +250,7 @@ void MainWindow::initialize() {
     onValChangeP1(0);
     onValChangeP2(1);
     onValChangeP3(100);
-    onValChangeP4(128);
+//    onValChangeP4(128);
     onValChangeP5(2500);
 
     // Set default values for near and far planes
@@ -270,7 +270,7 @@ void MainWindow::connectUIElements() {
     connectParam1();
     connectParam2();
     connectParam3();
-    connectParam4();
+//    connectParam4();
     connectParam5();
 //    connectNear();
 //    connectFar();
