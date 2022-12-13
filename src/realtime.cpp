@@ -215,6 +215,9 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
 
     GLint toonIncrementsLocation = glGetUniformLocation(m_phong_shader, "toonIncrements");
     glUniform1f(toonIncrementsLocation, (1.0f/settings.toonParam));
+    std::cout << settings.toonCheck << std::endl;
+
+    glUniform1i(glGetUniformLocation(m_phong_shader, "toonOn"), settings.toonCheck);
 
     // handle global properties
     GLint kaLoc = glGetUniformLocation(m_phong_shader, "ka");
@@ -284,6 +287,14 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
 }
 
 void Realtime::paintGL() {
+    //runTrack();
+
+    if (settings.playerCheck == true){
+    walkMode();
+    }
+    if (settings.marvelCheck == true){
+    marvelBeauty();
+    }
     // Students: anything requiring OpenGL calls every frame should be done here
     // Task 24: Bind FBO
     //glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
@@ -461,7 +472,118 @@ void Realtime::genBlockData() {
             }
         }
     }
+
+
+    //fillTrackBlocks();
 }
+std::vector<glm::vec3> Realtime::createTrackPositions(glm::vec3 pos1, glm::vec3 pos2){
+    std::vector<glm::vec3> returnVector;
+    float xIncrement = (pos2[0] - pos1[0])/10.f;
+    float yIncrement = (pos2[1] - pos1[2])/10.f;
+    float zIncrement = (pos2[1] - pos1[2])/10.f;
+
+    for (int i = 0; i < 10; i++){
+        glm::vec3 newPosition;
+        newPosition[0] = pos1[0]+(i*xIncrement);
+        newPosition[1] = pos1[1]+(i*yIncrement);
+        newPosition[2] = pos1[2]+(i*zIncrement);
+
+        returnVector.push_back(newPosition);
+    }
+    return returnVector;
+}
+
+//void Realtime::fillTrackBlocks(){
+//    int trackIncrements = settings.renderWidth/4;
+//    int trackWidth = settings.renderWidth - 2*(trackIncrements);
+//    trackLength = trackWidth*11;
+
+//    for (int i = 0; i < trackWidth; i++){
+//        int xPosMapSpace = i;
+//        int zPosMapSpace = 53;
+//        float yPos = (m_heightMap[xPosMapSpace][zPosMapSpace])+3;
+//        float xPos = (xPosMapSpace - (float)settings.renderWidth/2.0);
+//        float zPos = (zPosMapSpace - (float)settings.renderWidth/2.0);
+
+
+//        //std::cout << zPos  << std::endl;
+
+//        glm::vec3 addingTrackBlock = glm::vec3(xPos, yPos, zPos);
+
+
+
+//        trackBlocks.push_back(addingTrackBlock);
+
+
+//    }
+//    for(int i = 0; i < trackBlocks.size(); i++){
+//        std::vector<glm::vec3> trackPosList = createTrackPositions(trackBlocks[i], trackBlocks[i+1]);
+//        trackPos.push_back(trackPosList[0]);
+//        trackPos.push_back(trackPosList[1]);
+//        trackPos.push_back(trackPosList[2]);
+//        trackPos.push_back(trackPosList[3]);
+//        trackPos.push_back(trackPosList[4]);
+//        trackPos.push_back(trackPosList[5]);
+//        trackPos.push_back(trackPosList[6]);
+//        trackPos.push_back(trackPosList[7]);
+//        trackPos.push_back(trackPosList[8]);
+//        trackPos.push_back(trackPosList[9]);
+//        trackPos.push_back(trackPosList[10]);
+
+//    }
+
+//}
+
+//void Realtime::runTrack(){
+//    if(trackCounter > trackLength){
+//        trackCounter = 0;
+//    }
+
+
+//    m_sceneData.cameraData.pos[0] = trackPos[trackCounter][0];
+//    m_sceneData.cameraData.pos[1] = trackPos[trackCounter][1];
+//    m_sceneData.cameraData.pos[2] = trackPos[trackCounter][2];
+
+////    glm::vec4 newUpVector = glm::vec4(0.0f, 1.f, 0.f, 0.f);
+////    m_sceneData.cameraData.up = newUpVector;
+
+////    rebuildMatrices();
+//}
+
+void Realtime::walkMode(){
+    settings.movementSpeed = 10;
+    int walkingXpos = (round(m_sceneData.cameraData.pos[0])+settings.renderWidth/2.0);
+    int walkingZpos = (round(m_sceneData.cameraData.pos[2])+settings.renderWidth/2.0);
+
+     m_sceneData.cameraData.pos[1] = m_heightMap[walkingZpos][walkingXpos] + 3.f;
+     //std::cout << m_heightMap[walkingXpos][walkingZpos] + 2.f;
+     //glm::vec4 newUpVector = glm::vec4(0.0f, 1.f, 0.f, 0.f);
+
+    // m_sceneData.cameraData.up = newUpVector;
+
+     rebuildMatrices();
+}
+
+//get camera pos and dir depending on marvel angle.
+void Realtime::marvelBeauty(){
+    float radius = 120.f;
+    float newCameraPosX = radius * sin(3.14159265359 * 2 * marvelRotationAngle / 360.f);
+    float newCameraPosY = 60;
+    float newCameraPosZ = radius * cos(3.14159265359 * 2 * marvelRotationAngle / 360.f);
+
+    m_sceneData.cameraData.pos[0] = newCameraPosX;
+    m_sceneData.cameraData.pos[1] = newCameraPosY;
+    m_sceneData.cameraData.pos[2] = newCameraPosZ;
+
+    glm::vec4 newViewVector = glm::vec4(1.f, 1.f, 1.f, 1.f) - m_sceneData.cameraData.pos;
+    glm::vec4 newUpVector = glm::vec4(0.0f, 1.f, 0.f, 0.f);
+
+    m_sceneData.cameraData.up = newUpVector;
+    m_sceneData.cameraData.look = newViewVector;
+
+    rebuildMatrices();
+}
+
 
 // Go in all 4 directions until a biome is found, return biome ID with shortest distance traveled
 int Realtime::getNonEdgeNeighborID(int x, int y) {
@@ -615,8 +737,10 @@ void Realtime::genBiomeShapes() {
     }
 }
 
+
+
 void Realtime::computeBiomeTypes() {
-    loadImageFromFile("/Users/handoheon/Desktop/CS1230/FP file/graphics-final-project/resources/biomeMap.jpg");
+    loadImageFromFile("/Users/handoheon/Desktop/CS1230/FP-file/graphics-final-project/resources/biomeMap.jpg");
     // create necessary variables
     int biomeID;
     float temp;
@@ -828,7 +952,17 @@ void Realtime::mouseMoveEvent(QMouseEvent *event) {
 void Realtime::timerEvent(QTimerEvent *event) {
     int elapsedms   = m_elapsedTimer.elapsed();
     float deltaTime = elapsedms * 0.001f;
+
+
     m_elapsedTimer.restart();
+
+    trackCounter += deltaTime*3;
+//    std::cout << int(trackCounter) << std::endl;
+
+    marvelRotationAngle += deltaTime*3;
+    if (marvelRotationAngle >= 360.f){
+        marvelRotationAngle = 0.f;
+    }
 
     // Use deltaTime and m_keyMap here to move around
     // handle forward motion

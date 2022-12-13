@@ -18,6 +18,10 @@ struct Settings {
     bool extraCredit2 = false;
     bool extraCredit3 = false;
     bool extraCredit4 = false;
+
+    bool marvelCheck = false;
+    bool toonCheck = false;
+    bool playerCheck = false;
     int movementSpeed = 20;
     int mouseMovementSpeed = 5;
     static constexpr int renderWidth = 128;

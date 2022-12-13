@@ -21,7 +21,7 @@ uniform float shininess;
 
 uniform int toonCount;
 uniform float toonIncrements;
-bool toonOn;
+uniform bool toonOn;
 
 // Lights
 uniform vec4 lightIntensities[8];
@@ -100,11 +100,17 @@ void main() {
             }
             fragColor += att * falloff * lightIntensities[i] * kd * diff * dotProd;
 
+            // specular term (for things facing camera that are shiny)
+            if (dot(worldNorm, dirToCam) >= 0 && shininess > 0) {
+                vec3 Ri = computeReflect(worldNorm, dirToLight);
+                float specProd = max(0, dot(Ri, normalize(dirToCam)));
+                fragColor += floor(lightIntensities[i] * ks * spec * pow(specProd, shininess) * toonCount) * toonIncrements;
+
+            }
+
+
         }
         if (toonOn == false){
-            if (dotProd > 0){
-                dotProd = ceil(dotProd * toonCount) * toonIncrements;
-            }
 
             if (dotProd > 1){
                 dotProd = 1;
@@ -113,14 +119,16 @@ void main() {
                 dotProd = 0;
 
             }
-        fragColor += att * falloff * lightIntensities[i] * kd * diff * dotProd;
+            fragColor += att * falloff * lightIntensities[i] * kd * diff * dotProd;
 
-        // specular term (for things facing camera that are shiny)
-        if (dot(worldNorm, dirToCam) >= 0 && shininess > 0) {
-            vec3 Ri = computeReflect(worldNorm, dirToLight);
-            float specProd = max(0, dot(Ri, normalize(dirToCam)));
-            fragColor += floor(lightIntensities[i] * ks * spec * pow(specProd, shininess) * toonCount) * toonIncrements;
-        }
+            // specular term (for things facing camera that are shiny)
+            if (dot(worldNorm, dirToCam) >= 0 && shininess > 0) {
+                vec3 Ri = computeReflect(worldNorm, dirToLight);
+                float specProd = max(0, dot(Ri, normalize(dirToCam)));
+                fragColor += lightIntensities[i] * ks * spec * pow(specProd, shininess);
+
+            }
+
         }
     }
 }

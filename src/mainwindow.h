@@ -54,6 +54,10 @@ private:
     QSpinBox *p6Box;
     QSlider *p6Slider;
 
+    QCheckBox *marvelCheck;
+    QCheckBox *playerModeCheck;
+    QCheckBox *toonCheck;
+
     // Extra Credit:
     QCheckBox *ec1;
     QCheckBox *ec2;
@@ -70,12 +74,22 @@ private slots:
     void onValChangeP4(int newValue);
     void onValChangeP5(int newValue);
 
+    void connectMarvel();
+    void connectToonCheck();
+
+    void connectPlayerModeCheck();
+
     void onValChangeNearSlider(int newValue);
     void onValChangeFarSlider(int newValue);
     void onValChangeNearBox(double newValue);
     void onValChangeFarBox(double newValue);
 
     void onValChangeToonSlider(int newValue);
+
+    void onMarvelCheck();
+    void onToonCheck();
+    void onconnectPlayerModeCheck();
+
 
     // Extra Credit:
     void onExtraCredit1();

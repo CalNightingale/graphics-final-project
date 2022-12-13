@@ -150,4 +150,19 @@ private:
     glm::vec4 dayColor{13.f / 255.f,174.f / 255.f, 255.f / 255.f, 1};
     glm::vec4 nightColor{25.f / 255.f, 12.f / 255.f, 59.f / 255.f, 1};
     glm::vec4 sunsetColor{238.f / 255.f, 175.f / 255.f, 97.f / 255.f, 1};
+
+
+
+    float marvelRotationAngle = 0.0;
+    void marvelBeauty();
+
+    std::vector<glm::vec3> trackBlocks;
+    std::vector<glm::vec3> trackPos;
+    void fillTrackBlocks();
+    void runTrack();
+    float trackCounter = 0;
+    std::vector<glm::vec3> createTrackPositions(glm::vec3 pos1, glm::vec3 pos2);
+
+    int trackLength;
+    void walkMode();
 };

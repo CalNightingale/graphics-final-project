@@ -54,7 +54,17 @@ void MainWindow::initialize() {
     toonShading_label->setText("Toon Shading:");
 
 
+    marvelCheck = new QCheckBox();
+    marvelCheck->setText(QStringLiteral("Just marvel at the beauty:"));
+    marvelCheck->setChecked(false);
 
+    playerModeCheck = new QCheckBox();
+    playerModeCheck->setText(QStringLiteral("Player Mode:"));
+    playerModeCheck->setChecked(false);
+
+    toonCheck = new QCheckBox();
+    toonCheck->setText(QStringLiteral("Toon ON:"));
+    toonCheck->setChecked(false);
 //    // Create checkbox for per-pixel filter
 //    filter1 = new QCheckBox();
 //    filter1->setText(QStringLiteral("Per-Pixel Filter"));
@@ -253,6 +263,10 @@ void MainWindow::initialize() {
     vLayout->addWidget(p5Layout);
     vLayout->addWidget(toonShading_label);
     vLayout->addWidget(p6Layout);
+
+    vLayout->addWidget(marvelCheck);
+    vLayout->addWidget(playerModeCheck);
+    vLayout->addWidget(toonCheck);
 //    vLayout->addWidget(camera_label);
 //    vLayout->addWidget(near_label);
 //    vLayout->addWidget(nearLayout);
@@ -301,6 +315,19 @@ void MainWindow::connectUIElements() {
 //    connectFar();
 //    connectExtraCredit();
     connectToon();
+    connectMarvel();
+
+    connectToonCheck();
+    connectPlayerModeCheck();
+}
+void MainWindow::connectToonCheck() {
+    connect(toonCheck, &QCheckBox::clicked, this, &MainWindow::onToonCheck);
+}
+void MainWindow::connectPlayerModeCheck() {
+    connect(playerModeCheck, &QCheckBox::clicked, this, &MainWindow::onconnectPlayerModeCheck);
+}
+void MainWindow::connectMarvel() {
+    connect(marvelCheck, &QCheckBox::clicked, this, &MainWindow::onMarvelCheck);
 }
 
 void MainWindow::connectPerPixelFilter() {
@@ -370,6 +397,18 @@ void MainWindow::connectToon() {
             this, &MainWindow::onValChangeToonSlider);
 }
 
+void MainWindow::onMarvelCheck() {
+    settings.marvelCheck = !settings.marvelCheck;
+    realtime->settingsChanged();
+}
+void MainWindow::onToonCheck() {
+    settings.toonCheck = !settings.toonCheck;
+    realtime->settingsChanged();
+}
+void MainWindow::onconnectPlayerModeCheck() {
+    settings.playerCheck = !settings.playerCheck;
+    realtime->settingsChanged();
+}
 
 void MainWindow::onPerPixelFilter() {
     settings.perPixelFilter = !settings.perPixelFilter;
