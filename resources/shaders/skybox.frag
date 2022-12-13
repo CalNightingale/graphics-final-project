@@ -43,8 +43,8 @@ void main()
     int vPix = int(((v + 1) / 2.f) * cloudSize);
 
 
-
-    float sunProx = dot(normalize(texCoords), normalize(vec3(lightPos)));
+    vec3 fixedTexCoords = vec3(-texCoords.x, texCoords.y, -texCoords.z);
+    float sunProx = dot(normalize(fixedTexCoords), normalize(vec3(lightPos)));
 
 
 

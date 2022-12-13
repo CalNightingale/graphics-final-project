@@ -281,7 +281,12 @@ void Realtime::paintGL() {
     // Task 24: Bind FBO
     //glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
     // Task 28: Call glViewport
-    time = settings.shapeParameter5;
+    if (time != settings.shapeParameter5) {
+        time = settings.shapeParameter5;
+        // recalculate position of light based on time of day
+        m_sceneData.lights[0].pos = glm::vec4(0,1000*sin(time*M_PI / 5000),-1000*cos(time*M_PI / 5000),1);
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     glViewport(0, 0, m_fbo_width, m_fbo_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -707,7 +712,7 @@ void Realtime::settingsChanged() {
         settings.numBiomes = fmax(1, settings.shapeParameter2);
         settings.maxHeight = settings.shapeParameter3;
         populateBoundaryNoise();
-        settings.farPlane = 1000;
+        settings.farPlane = 500;
         genBiomeShapes();
         populateMaps();
         computeBiomeTypes();
