@@ -2,6 +2,9 @@
 
 This project is based on my implementation of Projects 5 & 6 for this class, using the OpenGL Realtime pipeline
 
+## How To Run
+- As soon as you've cloned this repository, the code is ready to run in the Qt Editor. Open it in Qt like with any CS1230 project, and remember to change the working directory in Qt to the repository directory. After you press run, the application will open. Now you can play with the sliders and toggles on the left hand interface to see their effects on the generated terrain.
+
 ## Design Choices
 - TO CHANGE DEFAULT SHADER VALUE, simply replace the initialization on line 57 of realtime.cpp with whatever value you need
 - Ocean renders and vertical stacks of blocks render as singular blocks for efficiency
