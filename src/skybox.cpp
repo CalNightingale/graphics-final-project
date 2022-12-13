@@ -4,7 +4,7 @@
 #include "debug.h"
 #include "./utils/shaderloader.h"
 #include <math.h>
-
+#include "noise/simplex.h"
 
 
 void loadVectorAsCubemap(GLuint &textureId, std::vector<glm::vec4> mapData, int textureSize){
@@ -164,13 +164,25 @@ void Realtime::setupSkybox(){
 
         int TEXTURE_SIZE = 100;
 
+
+
         std::vector<glm::vec4> cloudmap{};
         cloudmap.reserve(TEXTURE_SIZE*TEXTURE_SIZE);
+
+        Simplex simplex = Simplex();
+        std::vector<std::vector<float>> cloudNoise = simplex.noiseMap(TEXTURE_SIZE, settings.cloudSize, 0, 1, 0.5, 2.0);
+        std::vector<float> cloudNoiseFlattened;
+        for(auto& row: cloudNoise) {
+            for (auto& value: row) {
+                cloudNoiseFlattened.push_back(value);
+            }
+        }
+
+
         for(int i = 0; i < TEXTURE_SIZE*TEXTURE_SIZE; i++){
             long randNum = random();
             randNum %= 1000;
-
-            if(randNum < 100){
+            if (cloudNoiseFlattened[i] > 0.2){
                 cloudmap.push_back(glm::vec4(1,1,1,1));
             } else {
                 cloudmap.push_back(glm::vec4(0,0,0,1));

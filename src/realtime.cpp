@@ -671,7 +671,7 @@ void Realtime::populateSceneData() {
     m_sceneData.cameraData.focalLength = 0;
     m_sceneData.cameraData.heightAngle = 0.523599;
     //TOP DOWN VIEW
-    m_sceneData.cameraData.pos = glm::vec4(0, 10, 0, 1);
+    m_sceneData.cameraData.pos = glm::vec4(0, 50, 0, 1);
     m_sceneData.cameraData.look = glm::vec4(0, -1, 0, 0);
     m_sceneData.cameraData.up = glm::vec4(1, 0, 0, 0);
     /*// SIDE VIEW
