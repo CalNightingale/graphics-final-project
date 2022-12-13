@@ -12,3 +12,4 @@ graphics-final*
 qtcsettings.cmake
 CMakeLists.txt.user
 libStaticGLEW.a
+resources/.DS_Store
