@@ -100,6 +100,11 @@ void Realtime::initializeGL() {
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    Cube cube;
+    cube.updateParams(2);
+    vertexData = cube.generateShape();
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
 
     // STUFF FOR FBO
     glUseProgram(m_tex_shader);
@@ -153,11 +158,11 @@ void Realtime::initializeGL() {
     computeBlockShapeData();
     setupSkybox();
 
-    Cube cube;
-    cube.updateParams(2);
-    vertexData = cube.generateShape();
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
+//    Cube cube;
+//    cube.updateParams(2);
+//    vertexData = cube.generateShape();
+//    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
 }
 
 /**
@@ -203,8 +208,8 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, &m_proj[0][0]);
 
     GLint cameraPosLoc = glGetUniformLocation(m_phong_shader, "cameraPos");
-    // glm::vec4 cameraPos = inverse(m_view) * glm::vec4(0,0,0,1);
-    glm::vec4 cameraPos = glm::vec4(0,0,0,1); // TODO which one?
+    glm::vec4 cameraPos = inverse(m_view) * glm::vec4(0,0,0,1);
+    //glm::vec4 cameraPos = glm::vec4(0,0,0,1); // TODO which one?
     glUniform3fv(cameraPosLoc, 1, &cameraPos[0]);
 
     GLint toonCountLocation = glGetUniformLocation(m_phong_shader, "toonCount");
@@ -327,9 +332,14 @@ void Realtime::paintGeometry() {
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
     glBindVertexArray(m_vao);
     // iterate through each shape in the scene and render it
-    for (const Shape &s : m_shapeData) {
-        renderShape(s, ambLoc, diffLoc, specLoc, shineLoc);
+
+
+    //for (const Shape &s : m_shapeData) {
+    for (int i = 0; i < m_shapeData.size()-1; i++) {
+        renderShape(m_shapeData[i], ambLoc, diffLoc, specLoc, shineLoc);
     }
+
+    renderShape(m_shapeData[m_shapeData.size()-1], ambLoc, diffLoc, specLoc, shineLoc);
 
     // Unbind
     glBindVertexArray(0);
@@ -357,6 +367,11 @@ Shape genShapeFromBlock(const Block &block) {
     ctm[3][0] = block.pos.x;
     ctm[3][1] = block.pos.y;
     ctm[3][2] = block.pos.z;
+    if (block.color.b == 255) {
+        ctm[0][0] = settings.renderWidth;
+        ctm[1][1] = 1;
+        ctm[2][2] = settings.renderWidth;
+    }
 
     glm::mat4 inverseCTM = glm::inverse(ctm);
     glm::mat3 inverseTransposeCTM = glm::transpose(glm::mat3(inverseCTM));
@@ -453,7 +468,7 @@ void Realtime::genBlockData() {
             int y = m_heightMap[z][x];
             // render low points as water
             if (y == 0) {
-                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), SceneColor{0,0,255,1}});
+                //m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), SceneColor{0,0,255,1}});
                 continue;
             }
             // set edges to a neighboring biome
@@ -471,6 +486,7 @@ void Realtime::genBlockData() {
         }
     }
 
+    m_blockData.push_back(Block{glm::vec3(0, -1, 0), SceneColor{0,0,255,1}}); // The ocean block is the last block
 
     //fillTrackBlocks();
 }
