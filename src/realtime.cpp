@@ -281,6 +281,7 @@ void Realtime::paintGL() {
     // Task 24: Bind FBO
     //glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
     // Task 28: Call glViewport
+    time = settings.shapeParameter5;
     glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     glViewport(0, 0, m_fbo_width, m_fbo_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -699,20 +700,22 @@ void Realtime::sceneChanged() {
 }
 
 void Realtime::settingsChanged() {
-    computeBlockShapeData();
-    m_seed = settings.shapeParameter1;
-    srand(m_seed);
-    settings.numBiomes = fmax(1, settings.shapeParameter2);
-    settings.maxHeight = settings.shapeParameter3;
-    populateBoundaryNoise();
-    settings.farPlane = 1000;
-    genBiomeShapes();
-    populateMaps();
-    computeBiomeTypes();
-    populateHeights();
-    genBlockData();
-    computeBlockShapeData();
-    update(); // asks for a PaintGL() call to occur
+    if (m_seed != settings.shapeParameter1 || settings.numBiomes != settings.shapeParameter2 || settings.maxHeight != settings.shapeParameter3) {
+        computeBlockShapeData();
+        m_seed = settings.shapeParameter1;
+        srand(m_seed);
+        settings.numBiomes = fmax(1, settings.shapeParameter2);
+        settings.maxHeight = settings.shapeParameter3;
+        populateBoundaryNoise();
+        settings.farPlane = 1000;
+        genBiomeShapes();
+        populateMaps();
+        computeBiomeTypes();
+        populateHeights();
+        genBlockData();
+        computeBlockShapeData();
+        update(); // asks for a PaintGL() call to occur
+    }
 }
 
 /**
