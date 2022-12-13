@@ -19,6 +19,7 @@ struct Settings {
     bool extraCredit3 = false;
     bool extraCredit4 = false;
     int movementSpeed = 20;
+    int mouseMovementSpeed = 5;
     static constexpr int renderWidth = 128;
     int numBiomes = 10;
     int maxHeight = 100;

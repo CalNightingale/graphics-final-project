@@ -676,13 +676,13 @@ void Realtime::populateSceneData() {
     m_sceneData.cameraData.focalLength = 0;
     m_sceneData.cameraData.heightAngle = 0.523599;
     //TOP DOWN VIEW
-    m_sceneData.cameraData.pos = glm::vec4(0, settings.maxHeight*5, 0, 1);
+    m_sceneData.cameraData.pos = glm::vec4(0, 10, 0, 1);
     m_sceneData.cameraData.look = glm::vec4(0, -1, 0, 0);
     m_sceneData.cameraData.up = glm::vec4(1, 0, 0, 0);
     /*// SIDE VIEW
-    m_sceneData.cameraData.pos = glm::vec4(255/2, 0, 255/2, 1);
-    m_sceneData.cameraData.look = glm::vec4(1, 0, 0, 0);
-    m_sceneData.cameraData.up = glm::vec4(0, 1, 0, 0);*/
+//    m_sceneData.cameraData.pos = glm::vec4(255/2, 0, 255/2, 1);
+//    m_sceneData.cameraData.look = glm::vec4(1, 0, 0, 0);
+//    m_sceneData.cameraData.up = glm::vec4(0, 1, 0, 0);*/
 
     m_sceneData.globalData.ka = 0.2;
     m_sceneData.globalData.kd = 0.5;
@@ -802,13 +802,13 @@ void Realtime::mouseMoveEvent(QMouseEvent *event) {
 
         // Use deltaX and deltaY here to rotate
         if (m_mouseDown) {
-            glm::mat3 xRot = computeRotationMatrix(settings.movementSpeed * (float)deltaX / width(), glm::vec3(0,1,0));
-            m_sceneData.cameraData.pos = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.pos), 1);
+            glm::mat3 xRot = computeRotationMatrix(settings.mouseMovementSpeed * (float)deltaX / width(), glm::vec3(0,1,0));
+            //m_sceneData.cameraData.pos = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.pos), 1);
             m_sceneData.cameraData.look = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.look), 0);
             m_sceneData.cameraData.up = glm::vec4(xRot * glm::vec3(m_sceneData.cameraData.up), 0);
             glm::vec3 verticalAxis = normalize(cross(glm::vec3(m_sceneData.cameraData.look), glm::vec3(m_sceneData.cameraData.up)));
-            glm::mat3 yRot = computeRotationMatrix(settings.movementSpeed * (float)deltaY / height(), verticalAxis);
-            m_sceneData.cameraData.pos = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.pos), 1);
+            glm::mat3 yRot = computeRotationMatrix(settings.mouseMovementSpeed * (float)deltaY / height(), verticalAxis);
+            //m_sceneData.cameraData.pos = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.pos), 1);
             m_sceneData.cameraData.look = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.look), 0);
             m_sceneData.cameraData.up = glm::vec4(yRot * glm::vec3(m_sceneData.cameraData.up), 0);
         }
