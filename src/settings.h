@@ -25,6 +25,7 @@ struct Settings {
     int maxHeight = 100;
     int cloudSize = 10;
     float boundaryDisplacement = 8;
+    int toonParam = 1;
 };
 
 

@@ -50,6 +50,9 @@ void MainWindow::initialize() {
     QLabel *far_label = new QLabel(); // Far plane label
     far_label->setText("Far Plane:");
 
+    QLabel *toonShading_label = new QLabel(); //  toon shading label.
+    toonShading_label->setText("Toon Shading:");
+
 
 
 //    // Create checkbox for per-pixel filter
@@ -77,6 +80,9 @@ void MainWindow::initialize() {
     QHBoxLayout *l4 = new QHBoxLayout();
     QGroupBox *p5Layout = new QGroupBox(); // horizonal slider 3 alignment
     QHBoxLayout *l5 = new QHBoxLayout();
+
+    QGroupBox *p6Layout = new QGroupBox(); // cel shading alignment
+    QHBoxLayout *l6 = new QHBoxLayout();
 
     // Create slider controls to control parameters
     p1Slider = new QSlider(Qt::Orientation::Horizontal); // Parameter 1 slider
@@ -139,6 +145,18 @@ void MainWindow::initialize() {
     p5Box->setSingleStep(1);
     p5Box->setValue(2500);
 
+    p6Slider = new QSlider(Qt::Orientation::Horizontal); // Parameter 1 slider
+    p6Slider->setTickInterval(1);
+    p6Slider->setMinimum(1);
+    p6Slider->setMaximum(100);
+    p6Slider->setValue(1);
+
+    p6Box = new QSpinBox();
+    p6Box->setMinimum(1);
+    p6Box->setMaximum(100);
+    p6Box->setSingleStep(1);
+    p6Box->setValue(1);
+
     // Adds the slider and number box to the parameter layouts
     l1->addWidget(p1Slider);
     l1->addWidget(p1Box);
@@ -159,6 +177,10 @@ void MainWindow::initialize() {
     l5->addWidget(p5Slider);
     l5->addWidget(p5Box);
     p5Layout->setLayout(l5);
+
+    l6->addWidget(p6Slider);
+    l6->addWidget(p6Box);
+    p6Layout->setLayout(l6);
 
 //    // Creates the boxes containing the camera sliders and number boxes
 //    QGroupBox *nearLayout = new QGroupBox(); // horizonal near slider alignment
@@ -229,6 +251,8 @@ void MainWindow::initialize() {
 //    vLayout->addWidget(p4Layout);
     vLayout->addWidget(param5_label);
     vLayout->addWidget(p5Layout);
+    vLayout->addWidget(toonShading_label);
+    vLayout->addWidget(p6Layout);
 //    vLayout->addWidget(camera_label);
 //    vLayout->addWidget(near_label);
 //    vLayout->addWidget(nearLayout);
@@ -252,6 +276,7 @@ void MainWindow::initialize() {
     onValChangeP3(100);
 //    onValChangeP4(128);
     onValChangeP5(2500);
+    onValChangeToonSlider(3);
 
     // Set default values for near and far planes
 //    onValChangeNearBox(0.1f);
@@ -275,6 +300,7 @@ void MainWindow::connectUIElements() {
 //    connectNear();
 //    connectFar();
 //    connectExtraCredit();
+    connectToon();
 }
 
 void MainWindow::connectPerPixelFilter() {
@@ -337,6 +363,13 @@ void MainWindow::connectExtraCredit() {
     connect(ec3, &QCheckBox::clicked, this, &MainWindow::onExtraCredit3);
     connect(ec4, &QCheckBox::clicked, this, &MainWindow::onExtraCredit4);
 }
+
+void MainWindow::connectToon() {
+    connect(p6Slider, &QSlider::valueChanged, this, &MainWindow::onValChangeToonSlider);
+    connect(p6Box, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            this, &MainWindow::onValChangeToonSlider);
+}
+
 
 void MainWindow::onPerPixelFilter() {
     settings.perPixelFilter = !settings.perPixelFilter;
@@ -448,3 +481,13 @@ void MainWindow::onExtraCredit4() {
     settings.extraCredit4 = !settings.extraCredit4;
     realtime->settingsChanged();
 }
+
+
+
+void MainWindow::onValChangeToonSlider(int newValue) {
+    p6Slider->setValue(newValue);
+    p6Box->setValue(newValue);
+    settings.toonParam = p6Slider->value();
+    realtime->settingsChanged();
+}
+

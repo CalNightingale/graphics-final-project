@@ -30,6 +30,8 @@ private:
     void connectUploadFile();
     void connectExtraCredit();
 
+    void connectToon();
+
     Realtime *realtime;
     QCheckBox *filter1;
     QCheckBox *filter2;
@@ -48,6 +50,9 @@ private:
     QSlider *farSlider;
     QDoubleSpinBox *nearBox;
     QDoubleSpinBox *farBox;
+
+    QSpinBox *p6Box;
+    QSlider *p6Slider;
 
     // Extra Credit:
     QCheckBox *ec1;
@@ -69,6 +74,8 @@ private slots:
     void onValChangeFarSlider(int newValue);
     void onValChangeNearBox(double newValue);
     void onValChangeFarBox(double newValue);
+
+    void onValChangeToonSlider(int newValue);
 
     // Extra Credit:
     void onExtraCredit1();

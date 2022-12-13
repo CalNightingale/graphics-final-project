@@ -83,8 +83,8 @@ void Realtime::initializeGL() {
 
     // Students: anything requiring OpenGL calls when the program starts should be done here
     // load shaders
-    m_phong_shader = ShaderLoader::createShaderProgram("resources/shaders/phong.vert", "resources/shaders/phong.frag");
-    m_tex_shader = ShaderLoader::createShaderProgram("resources/shaders/texture.vert", "resources/shaders/texture.frag");
+    m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
+    m_tex_shader = ShaderLoader::createShaderProgram(":/resources/shaders/texture.vert", ":/resources/shaders/texture.frag");
     // gen & bind vbo
     glGenBuffers(1, &m_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -208,6 +208,13 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
     GLint cameraPosLoc = glGetUniformLocation(m_phong_shader, "cameraPos");
     glm::vec4 cameraPos = inverse(m_view) * glm::vec4(0,0,0,1);
     glUniform3fv(cameraPosLoc, 1, &cameraPos[0]);
+
+    GLint toonCountLocation = glGetUniformLocation(m_phong_shader, "toonCount");
+    glUniform1i(toonCountLocation, settings.toonParam);
+
+
+    GLint toonIncrementsLocation = glGetUniformLocation(m_phong_shader, "toonIncrements");
+    glUniform1f(toonIncrementsLocation, (1.0f/settings.toonParam));
 
     // handle global properties
     GLint kaLoc = glGetUniformLocation(m_phong_shader, "ka");
@@ -609,7 +616,7 @@ void Realtime::genBiomeShapes() {
 }
 
 void Realtime::computeBiomeTypes() {
-    loadImageFromFile("resources/biomeMap.jpg");
+    loadImageFromFile("/Users/handoheon/Desktop/CS1230/FP file/graphics-final-project/resources/biomeMap.jpg");
     // create necessary variables
     int biomeID;
     float temp;

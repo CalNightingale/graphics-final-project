@@ -19,6 +19,10 @@ uniform vec4 diff;
 uniform vec4 spec;
 uniform float shininess;
 
+uniform int toonCount;
+uniform float toonIncrements;
+bool toonOn;
+
 // Lights
 uniform vec4 lightIntensities[8];
 uniform vec3 lightDirs[8]; // directions TO lights FROM point
@@ -79,13 +83,44 @@ void main() {
 
         // diffuse term
         float dotProd = max(0.0, min(dot(normalize(worldNorm), normalize(dirToLight)), 1.0));
+
+        if (toonOn == true){
+
+
+            if (dotProd > 0){
+                dotProd = ceil(dotProd * toonCount) * toonIncrements;
+            }
+
+            if (dotProd > 1){
+                dotProd = 1;
+            }
+            if (dotProd < 0){
+                dotProd = 0;
+
+            }
+            fragColor += att * falloff * lightIntensities[i] * kd * diff * dotProd;
+
+        }
+        if (toonOn == false){
+            if (dotProd > 0){
+                dotProd = ceil(dotProd * toonCount) * toonIncrements;
+            }
+
+            if (dotProd > 1){
+                dotProd = 1;
+            }
+            if (dotProd < 0){
+                dotProd = 0;
+
+            }
         fragColor += att * falloff * lightIntensities[i] * kd * diff * dotProd;
 
         // specular term (for things facing camera that are shiny)
         if (dot(worldNorm, dirToCam) >= 0 && shininess > 0) {
             vec3 Ri = computeReflect(worldNorm, dirToLight);
             float specProd = max(0, dot(Ri, normalize(dirToCam)));
-            fragColor += lightIntensities[i] * ks * spec * pow(specProd, shininess);
+            fragColor += floor(lightIntensities[i] * ks * spec * pow(specProd, shininess) * toonCount) * toonIncrements;
+        }
         }
     }
 }
