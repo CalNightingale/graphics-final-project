@@ -284,7 +284,7 @@ void Realtime::paintGL() {
     if (time != settings.shapeParameter5) {
         time = settings.shapeParameter5;
         // recalculate position of light based on time of day
-        m_sceneData.lights[0].pos = glm::vec4(0,100*sin(time*M_PI / 5000),-100*cos(time*M_PI / 5000),1);
+        m_sceneData.lights[0].pos = glm::vec4(0,1000*sin(time*M_PI / 5000),-1000*cos(time*M_PI / 5000),1);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
