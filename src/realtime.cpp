@@ -258,8 +258,14 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
 
         glUniform4fv(lightIntLoc, 1, &curLight.color[0]);
         glUniform3f(lightDirLoc, curLight.dir.x, curLight.dir.y, curLight.dir.z);
-        //glUniform3f(lightPosLoc, curLight.pos.x, curLight.pos.y, curLight.pos.z);
-        glUniform3f(lightPosLoc, (settings.shapeParameter5/10)-250, 30, 0);
+        if (settings.toonCheck == true){
+            glUniform3f(lightPosLoc, 0, 30, (settings.shapeParameter5/10)-250);
+        }
+        else if (settings.toonCheck == false){
+            glUniform3f(lightPosLoc, curLight.pos.x, curLight.pos.y, curLight.pos.z);
+        }
+
+
         glUniform3f(lightFuncLoc, curLight.function.x, curLight.function.y, curLight.function.z);
         glUniform1f(lightAngleLoc, curLight.angle);
         glUniform1f(lightPenumbraLoc, curLight.penumbra);
