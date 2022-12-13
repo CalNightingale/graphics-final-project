@@ -154,6 +154,7 @@ void Realtime::initializeGL() {
     populateHeights();
     genBlockData();
     computeBlockShapeData();
+    setupSkybox();
 
     Cube cube;
     cube.updateParams(2);
@@ -284,6 +285,7 @@ void Realtime::paintGL() {
     glViewport(0, 0, m_fbo_width, m_fbo_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     paintGeometry();
+    paintSkybox();
     // Task 25: Bind the default framebuffer
     //glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     // Task 26: Clear the color and depth buffers

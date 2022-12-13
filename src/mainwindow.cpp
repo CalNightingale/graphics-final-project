@@ -41,6 +41,10 @@ void MainWindow::initialize() {
     param2_label->setText("Number of Biomes:");
     QLabel *param3_label = new QLabel(); // Parameter 2 label
     param3_label->setText("Max Height:");
+    QLabel *param4_label = new QLabel(); // Parameter 2 label
+    param4_label->setText("Size:");
+    QLabel *param5_label = new QLabel(); // Parameter 2 label
+    param5_label->setText("Time of Day:");
     QLabel *near_label = new QLabel(); // Near plane label
     near_label->setText("Near Plane:");
     QLabel *far_label = new QLabel(); // Far plane label
@@ -69,6 +73,10 @@ void MainWindow::initialize() {
     QHBoxLayout *l2 = new QHBoxLayout();
     QGroupBox *p3Layout = new QGroupBox(); // horizonal slider 3 alignment
     QHBoxLayout *l3 = new QHBoxLayout();
+    QGroupBox *p4Layout = new QGroupBox(); // horizonal slider 3 alignment
+    QHBoxLayout *l4 = new QHBoxLayout();
+    QGroupBox *p5Layout = new QGroupBox(); // horizonal slider 3 alignment
+    QHBoxLayout *l5 = new QHBoxLayout();
 
     // Create slider controls to control parameters
     p1Slider = new QSlider(Qt::Orientation::Horizontal); // Parameter 1 slider
@@ -107,6 +115,30 @@ void MainWindow::initialize() {
     p3Box->setSingleStep(10);
     p3Box->setValue(100);
 
+    p4Slider = new QSlider(Qt::Orientation::Horizontal); // Parameter 4 slider
+    p4Slider->setTickInterval(32);
+    p4Slider->setMinimum(64);
+    p4Slider->setMaximum(256);
+    p4Slider->setValue(128);
+
+    p4Box = new QSpinBox();
+    p4Box->setMinimum(64);
+    p4Box->setMaximum(256);
+    p4Box->setSingleStep(32);
+    p4Box->setValue(128);
+
+    p5Slider = new QSlider(Qt::Orientation::Horizontal); // Parameter 5 slider
+    p5Slider->setTickInterval(1);
+    p5Slider->setMinimum(1);
+    p5Slider->setMaximum(5000);
+    p5Slider->setValue(2500);
+
+    p5Box = new QSpinBox();
+    p5Box->setMinimum(1);
+    p5Box->setMaximum(5000);
+    p5Box->setSingleStep(1);
+    p5Box->setValue(2500);
+
     // Adds the slider and number box to the parameter layouts
     l1->addWidget(p1Slider);
     l1->addWidget(p1Box);
@@ -119,6 +151,14 @@ void MainWindow::initialize() {
     l3->addWidget(p3Slider);
     l3->addWidget(p3Box);
     p3Layout->setLayout(l3);
+
+    l4->addWidget(p4Slider);
+    l4->addWidget(p4Box);
+    p4Layout->setLayout(l4);
+
+    l5->addWidget(p5Slider);
+    l5->addWidget(p5Box);
+    p5Layout->setLayout(l5);
 
 //    // Creates the boxes containing the camera sliders and number boxes
 //    QGroupBox *nearLayout = new QGroupBox(); // horizonal near slider alignment
@@ -185,6 +225,10 @@ void MainWindow::initialize() {
     vLayout->addWidget(p2Layout);
     vLayout->addWidget(param3_label);
     vLayout->addWidget(p3Layout);
+    vLayout->addWidget(param4_label);
+    vLayout->addWidget(p4Layout);
+    vLayout->addWidget(param5_label);
+    vLayout->addWidget(p5Layout);
 //    vLayout->addWidget(camera_label);
 //    vLayout->addWidget(near_label);
 //    vLayout->addWidget(nearLayout);
@@ -206,6 +250,8 @@ void MainWindow::initialize() {
     onValChangeP1(0);
     onValChangeP2(1);
     onValChangeP3(100);
+    onValChangeP4(128);
+    onValChangeP5(2500);
 
     // Set default values for near and far planes
 //    onValChangeNearBox(0.1f);
@@ -224,6 +270,8 @@ void MainWindow::connectUIElements() {
     connectParam1();
     connectParam2();
     connectParam3();
+    connectParam4();
+    connectParam5();
 //    connectNear();
 //    connectFar();
 //    connectExtraCredit();
@@ -257,6 +305,18 @@ void MainWindow::connectParam3() {
     connect(p3Slider, &QSlider::valueChanged, this, &MainWindow::onValChangeP3);
     connect(p3Box, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
             this, &MainWindow::onValChangeP3);
+}
+
+void MainWindow::connectParam4() {
+    connect(p4Slider, &QSlider::valueChanged, this, &MainWindow::onValChangeP4);
+    connect(p4Box, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            this, &MainWindow::onValChangeP4);
+}
+
+void MainWindow::connectParam5() {
+    connect(p5Slider, &QSlider::valueChanged, this, &MainWindow::onValChangeP5);
+    connect(p5Box, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            this, &MainWindow::onValChangeP5);
 }
 
 void MainWindow::connectNear() {
@@ -322,6 +382,20 @@ void MainWindow::onValChangeP3(int newValue) {
     p3Slider->setValue(newValue);
     p3Box->setValue(newValue);
     settings.shapeParameter3 = p3Slider->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeP4(int newValue) {
+    p4Slider->setValue(newValue);
+    p4Box->setValue(newValue);
+    settings.shapeParameter4 = p4Slider->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeP5(int newValue) {
+    p5Slider->setValue(newValue);
+    p5Box->setValue(newValue);
+    settings.shapeParameter5 = p5Slider->value();
     realtime->settingsChanged();
 }
 
