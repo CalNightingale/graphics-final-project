@@ -102,7 +102,7 @@ void main()
             FragColor += (1 - smoothstep(0, 1000, time)) * texture(starTexture, texCoords);
         }
 
-//        FragColor += (( smoothstep(0, 1000, time) + 0.5) / 1.5f) * texture(skybox, texCoords);
+        FragColor += (( smoothstep(0, 1000, time) + 0.5) / 1.5f) * texture(skybox, texCoords);
     }
     else if(time > 4000){
         if(cloudCol == vec4(0,0,0,1) && !showSun){
@@ -110,7 +110,7 @@ void main()
         }
         FragColor += ((1 -  ( smoothstep(4000, 5000, time)) + 0.5) / 1.5f) *texture(skybox, texCoords);
     }  else {
-//        FragColor += texture(skybox, texCoords);
+        FragColor += texture(skybox, texCoords);
 
     }
 

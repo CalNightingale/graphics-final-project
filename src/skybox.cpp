@@ -269,6 +269,17 @@ void Realtime::paintSkybox(){
     // activate the skybox shader
     glDepthFunc(GL_LEQUAL);
     glUseProgram(m_skybox_shader);
+    float timeRatio = (float) time / (float) dayLength;
+
+
+    if(timeRatio < .5){
+        float linInterp = (timeRatio  / .5);
+        skyColor = (linInterp * dayColor) + (1-linInterp)*nightColor;
+    } else{
+        float linInterp = ((timeRatio - .5) / (1 - .5));
+        skyColor = (linInterp * nightColor) + (1-linInterp)*dayColor;
+    }
+
 
 
     glm::mat4 skyboxView = glm::mat4(glm::mat3(m_view));
