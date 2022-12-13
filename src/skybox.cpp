@@ -57,7 +57,7 @@ void loadVectorAsCubemap(GLuint &textureId, std::vector<glm::vec4> mapData, int 
 
 
 void Realtime::setupSkybox(){
-    Debug::glErrorCheck();
+    //Debug::glErrorCheck();
 
     m_verticiesVector.clear();
 
