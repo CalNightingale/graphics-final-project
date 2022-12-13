@@ -31,6 +31,7 @@ public:
     void finish();                                      // Called on program exit
     void sceneChanged();
     void settingsChanged();
+    void teleportToOrigin();
     static void insertVec3(std::vector<float> &data, glm::vec3 v);
     static void insertVertex(std::vector<float> &data, glm::vec3 pos, glm::vec3 norm, glm::vec3 color);
 
@@ -167,4 +168,5 @@ private:
 
     int trackLength;
     void walkMode();
+
 };

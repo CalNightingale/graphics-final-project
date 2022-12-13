@@ -408,6 +408,7 @@ void MainWindow::onToonCheck() {
 void MainWindow::onconnectPlayerModeCheck() {
     settings.playerCheck = !settings.playerCheck;
     realtime->settingsChanged();
+    realtime->teleportToOrigin();
 }
 
 void MainWindow::onPerPixelFilter() {

@@ -218,7 +218,7 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
 
     GLint toonIncrementsLocation = glGetUniformLocation(m_phong_shader, "toonIncrements");
     glUniform1f(toonIncrementsLocation, (1.0f/settings.toonParam));
-    //std::cout << settings.toonCheck << std::endl;
+    std::cout << settings.toonCheck << std::endl;
 
     glUniform1i(glGetUniformLocation(m_phong_shader, "toonOn"), settings.toonCheck);
 
@@ -873,6 +873,16 @@ void Realtime::settingsChanged() {
         computeBlockShapeData();
         update(); // asks for a PaintGL() call to occur
     }
+}
+void Realtime::teleportToOrigin(){
+    float newCameraPosX = 0;
+    float newCameraPosZ = 0;
+
+    m_sceneData.cameraData.pos[0] = newCameraPosX;
+    m_sceneData.cameraData.pos[2] = newCameraPosZ;
+
+
+    rebuildMatrices();
 }
 
 /**
