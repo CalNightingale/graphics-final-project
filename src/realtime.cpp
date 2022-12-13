@@ -80,8 +80,8 @@ void Realtime::initializeGL() {
 
     // Students: anything requiring OpenGL calls when the program starts should be done here
     // load shaders
-    m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
-    m_tex_shader = ShaderLoader::createShaderProgram(":/resources/shaders/texture.vert", ":/resources/shaders/texture.frag");
+    m_phong_shader = ShaderLoader::createShaderProgram("resources/shaders/phong.vert", "resources/shaders/phong.frag");
+    m_tex_shader = ShaderLoader::createShaderProgram("resources/shaders/texture.vert", "resources/shaders/texture.frag");
     // gen & bind vbo
     glGenBuffers(1, &m_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -213,7 +213,7 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
 
     GLint toonIncrementsLocation = glGetUniformLocation(m_phong_shader, "toonIncrements");
     glUniform1f(toonIncrementsLocation, (1.0f/settings.toonParam));
-    std::cout << settings.toonCheck << std::endl;
+    //std::cout << settings.toonCheck << std::endl;
 
     glUniform1i(glGetUniformLocation(m_phong_shader, "toonOn"), settings.toonCheck);
 
@@ -350,7 +350,7 @@ Shape genShapeFromBlock(const Block &block) {
     // SceneMaterial has: ambient, diffuse, spec vec4s, shininess float, and other stuff we don't need
     // generate RenderShapeData
 
-    SceneColor scaledDiff = SceneColor{block.color.r / 255, block.color.g / 255, block.color.b / 255, 1};
+    SceneColor scaledDiff = SceneColor{block.color.r / 255.0f, block.color.g / 255.0f, block.color.b / 255.0f, 1};
     SceneMaterial mat = SceneMaterial{blockAmbient, scaledDiff, blockSpecular, blockShininess};
     ScenePrimitive prim = ScenePrimitive{PrimitiveType::PRIMITIVE_CUBE, mat};
     glm::mat4 ctm = glm::mat4(1.f);
@@ -457,7 +457,7 @@ void Realtime::genBlockData() {
                 continue;
             }
             // set edges to a neighboring biome
-            if (biomeID == -1) biomeID = getNonEdgeNeighborID(x, z);
+            if (biomeID == -1 || biomeID == -10) biomeID = getNonEdgeNeighborID(x, z);
             SceneColor col = m_biomeColors[biomeID];
             // start at top, generate blocks until lower than all surrounding blocks
             int lowestNeighbor = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
@@ -744,7 +744,7 @@ void Realtime::genBiomeShapes() {
 
 
 void Realtime::computeBiomeTypes() {
-    loadImageFromFile("/Users/handoheon/Desktop/CS1230/FP-file/graphics-final-project/resources/biome_image.png");
+    loadImageFromFile("resources/biome_image.png");
     // create necessary variables
     int biomeID;
     float temp;
@@ -801,6 +801,8 @@ void Realtime::computeBiomeTypes() {
             m_biomeTypes[i] = 7;
         } else if (m_biomeColors[i].r == 35) { // boreal forest
             m_biomeTypes[i] = 8;
+        } else{
+            m_biomeTypes[i] = 0;
         }
     }
 }
@@ -843,7 +845,6 @@ void Realtime::settingsChanged() {
     if (m_seed != settings.shapeParameter1 || settings.numBiomes != settings.shapeParameter2 || settings.maxHeight != settings.shapeParameter3) {
         computeBlockShapeData();
         m_seed = settings.shapeParameter1;
-        srand(m_seed);
         settings.numBiomes = fmax(1, settings.shapeParameter2);
         settings.maxHeight = settings.shapeParameter3;
         populateBoundaryNoise();
