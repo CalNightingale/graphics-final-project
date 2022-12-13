@@ -17,8 +17,12 @@ None
 - Replace solid color blocks with textures
 
 ## Credits
-Brian: Toon shading, view modes (player mode, presentation mode, etc.)
-Cal: Voronoi implementation (using https://github.com/JCash/voronoi), Biome generation & Assignment
+###[Brian](https://github.com/Brian-han77)
+Toon shading, view modes (player mode, presentation mode, etc.)
+###[Cal](https://github.com/CalNightingale)
+Voronoi implementation (using https://github.com/JCash/voronoi), Biome generation & Assignment
 (based on [this article](https://towardsdatascience.com/replicating-minecraft-world-generation-in-python-1b491bc9b9a4))
-Dustin: Simplex noise generation, noise map population (temperature, precipitation, height, clouds, etc.), day/night cycling
-Logan: Skybox (background image + movement, cloud generation, sun + movement)
+###[Dustin](https://github.com/dustin-wu)
+Simplex noise generation, noise map population (temperature, precipitation, height, clouds, etc.), day/night cycling
+###[Logan](https://github.com/lmb2lmb)
+Skybox (background image + movement, cloud generation, sun + movement)
