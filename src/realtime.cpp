@@ -80,8 +80,8 @@ void Realtime::initializeGL() {
 
     // Students: anything requiring OpenGL calls when the program starts should be done here
     // load shaders
-    m_phong_shader = ShaderLoader::createShaderProgram("resources/shaders/phong.vert", "resources/shaders/phong.frag");
-    m_tex_shader = ShaderLoader::createShaderProgram("resources/shaders/texture.vert", "resources/shaders/texture.frag");
+    m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
+    m_tex_shader = ShaderLoader::createShaderProgram(":/resources/shaders/texture.vert", ":/resources/shaders/texture.frag");
     // gen & bind vbo
     glGenBuffers(1, &m_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -253,7 +253,8 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
 
         glUniform4fv(lightIntLoc, 1, &curLight.color[0]);
         glUniform3f(lightDirLoc, curLight.dir.x, curLight.dir.y, curLight.dir.z);
-        glUniform3f(lightPosLoc, curLight.pos.x, curLight.pos.y, curLight.pos.z);
+        //glUniform3f(lightPosLoc, curLight.pos.x, curLight.pos.y, curLight.pos.z);
+        glUniform3f(lightPosLoc, (settings.shapeParameter5/10)-250, 30, 0);
         glUniform3f(lightFuncLoc, curLight.function.x, curLight.function.y, curLight.function.z);
         glUniform1f(lightAngleLoc, curLight.angle);
         glUniform1f(lightPenumbraLoc, curLight.penumbra);
@@ -744,7 +745,7 @@ void Realtime::genBiomeShapes() {
 
 
 void Realtime::computeBiomeTypes() {
-    loadImageFromFile("resources/biome_image.png");
+    loadImageFromFile("/Users/handoheon/Desktop/CS1230/FP-file/graphics-final-project/resources/biome_image.png");
     // create necessary variables
     int biomeID;
     float temp;
