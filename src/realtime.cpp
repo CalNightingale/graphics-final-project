@@ -218,7 +218,7 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
 
     GLint toonIncrementsLocation = glGetUniformLocation(m_phong_shader, "toonIncrements");
     glUniform1f(toonIncrementsLocation, (1.0f/settings.toonParam));
-    std::cout << settings.toonCheck << std::endl;
+    //std::cout << settings.toonCheck << std::endl;
 
     glUniform1i(glGetUniformLocation(m_phong_shader, "toonOn"), settings.toonCheck);
 
@@ -365,12 +365,14 @@ Shape genShapeFromBlock(const Block &block) {
     ScenePrimitive prim = ScenePrimitive{PrimitiveType::PRIMITIVE_CUBE, mat};
     glm::mat4 ctm = glm::mat4(1.f);
     ctm[3][0] = block.pos.x;
-    ctm[3][1] = block.pos.y;
+    ctm[3][1] = block.pos.y / 2;
     ctm[3][2] = block.pos.z;
     if (block.color.b == 255) {
         ctm[0][0] = settings.renderWidth;
         ctm[1][1] = 1;
         ctm[2][2] = settings.renderWidth;
+    } else {
+        ctm[1][1] = block.pos.y;
     }
 
     glm::mat4 inverseCTM = glm::inverse(ctm);
@@ -475,14 +477,15 @@ void Realtime::genBlockData() {
             if (biomeID == -1 || biomeID == -10) biomeID = getNonEdgeNeighborID(x, z);
             SceneColor col = m_biomeColors[biomeID];
             // start at top, generate blocks until lower than all surrounding blocks
-            int lowestNeighbor = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
-            if (y < lowestNeighbor) {
-                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
-            }
-            while (y >= lowestNeighbor) {
-                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
-                y--;
-            }
+            //int lowestNeighbor = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
+            m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
+//            if (y < lowestNeighbor) {
+//                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
+//            }
+//            while (y >= lowestNeighbor) {
+//                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
+//                y--;
+//            }
         }
     }
 

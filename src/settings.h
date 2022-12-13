@@ -24,7 +24,7 @@ struct Settings {
     bool playerCheck = false;
     int movementSpeed = 20;
     int mouseMovementSpeed = 5;
-    static constexpr int renderWidth = 128;
+    static constexpr int renderWidth = 200;
     int numBiomes = 10;
     int maxHeight = 100;
     int cloudSize = 10;
