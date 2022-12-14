@@ -1,6 +1,8 @@
 # CS1230 Final Project: Minecraft-Style Terrain Generation!
 
-This project is based on my implementation of Projects 5 & 6 for this class, using the OpenGL Realtime pipeline
+![An example of generated terrain](readmebanner?raw=true)
+
+This project is based on my (Cal's) implementation of Projects 5 & 6 for Brown's CS 1230, using the OpenGL Realtime pipeline
 
 ## How To Run
 - As soon as you've cloned this repository, the code is ready to run in the Qt Editor. Open it in Qt like with any CS1230 project, and remember to change the working directory in Qt to the repository directory. After you press run, the application will open.
