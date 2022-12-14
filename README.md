@@ -1,6 +1,6 @@
 # CS1230 Final Project: Minecraft-Style Terrain Generation!
 
-![An example of generated terrain](readmebanner?raw=true)
+![An example of generated terrain](readmebanner.png?raw=true)
 
 This project is based on my (Cal's) implementation of Projects 5 & 6 for Brown's CS 1230, using the OpenGL Realtime pipeline
 
