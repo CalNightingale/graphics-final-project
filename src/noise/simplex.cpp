@@ -1,4 +1,4 @@
-// Based on the implementation available here: https://weber.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
+// Based on the implementation of Simplex Noise described here: https://weber.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
 
 #include "simplex.h"
 #include <cmath>
@@ -108,6 +108,7 @@ float Simplex::noise(float x, float y, float scale, float octaves, float persist
 }
 
 std::vector<std::vector<float>> Simplex::noiseMap(int size, int res, int seed, int octaves, float persistence, float lacunarity) {
+    // We use our seed to shuffle the permutation table
     std::shuffle(p, p+256, std::default_random_engine(seed));
     for (int i = 0; i < 512; i++) {
         perm[i] = p[i & 255];

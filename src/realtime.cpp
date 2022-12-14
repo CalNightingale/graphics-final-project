@@ -52,6 +52,7 @@ void Realtime::finish() {
 }
 
 void Realtime::initializeGL() {
+    // Anything requiring OpenGL calls when the program starts should be done here
     m_devicePixelRatio = this->devicePixelRatio();
 
     m_defaultFBO = 2; // CHANGE THIS IF NECESSARY FOR YOUR DEVICE
@@ -78,7 +79,6 @@ void Realtime::initializeGL() {
     // Tells OpenGL how big the screen is
     // delete this maybe glViewport(0, 0, size().width() * m_devicePixelRatio, size().height() * m_devicePixelRatio);
 
-    // Students: anything requiring OpenGL calls when the program starts should be done here
     // load shaders
     m_phong_shader = ShaderLoader::createShaderProgram("resources/shaders/phong.vert", "resources/shaders/phong.frag");
     m_tex_shader = ShaderLoader::createShaderProgram("resources/shaders/texture.vert", "resources/shaders/texture.frag");
@@ -100,6 +100,7 @@ void Realtime::initializeGL() {
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    // Initialize vertex data once (we can do this since everything is a cube)
     Cube cube;
     cube.updateParams(2);
     vertexData = cube.generateShape();
@@ -157,12 +158,6 @@ void Realtime::initializeGL() {
     genBlockData();
     computeBlockShapeData();
     setupSkybox();
-
-//    Cube cube;
-//    cube.updateParams(2);
-//    vertexData = cube.generateShape();
-//    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
 }
 
 /**
@@ -265,7 +260,6 @@ std::tuple<GLint, GLint, GLint, GLint> Realtime::initializeShader() {
             glUniform3f(lightPosLoc, curLight.pos.x, curLight.pos.y, curLight.pos.z);
         }
 
-
         glUniform3f(lightFuncLoc, curLight.function.x, curLight.function.y, curLight.function.z);
         glUniform1f(lightAngleLoc, curLight.angle);
         glUniform1f(lightPenumbraLoc, curLight.penumbra);
@@ -305,10 +299,8 @@ void Realtime::paintGL() {
     if (settings.marvelCheck == true){
     marvelBeauty();
     }
-    // Students: anything requiring OpenGL calls every frame should be done here
-    // Task 24: Bind FBO
-    //glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    // Task 28: Call glViewport
+    // Anything requiring OpenGL calls every frame should be done here
+
     if (time != settings.shapeParameter5) {
         time = settings.shapeParameter5;
         // recalculate position of light based on time of day
@@ -320,12 +312,6 @@ void Realtime::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     paintGeometry();
     paintSkybox();
-    // Task 25: Bind the default framebuffer
-    //glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-    // Task 26: Clear the color and depth buffers
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // Task 27: Call paintTexture to draw our FBO color attachment texture
-    //paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
 }
 
 // modified from lab 11's paintExampleGeometry() method
@@ -338,14 +324,13 @@ void Realtime::paintGeometry() {
     // bind vbo
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
     glBindVertexArray(m_vao);
-    // iterate through each shape in the scene and render it
 
-
-    //for (const Shape &s : m_shapeData) {
+    // Render terrain blocks
     for (int i = 0; i < m_shapeData.size()-1; i++) {
         renderShape(m_shapeData[i], ambLoc, diffLoc, specLoc, shineLoc);
     }
 
+    // Render ocean
     renderShape(m_shapeData[m_shapeData.size()-1], ambLoc, diffLoc, specLoc, shineLoc);
 
     // Unbind
@@ -365,20 +350,23 @@ Shape genShapeFromBlock(const Block &block) {
     // ScenePrimitive has 2 parts: PrimitiveType type and SceneMaterial material
     //      also has std::string meshfile but we don't use this
     // SceneMaterial has: ambient, diffuse, spec vec4s, shininess float, and other stuff we don't need
-    // generate RenderShapeData
 
+    // Generate RenderShapeData
     SceneColor scaledDiff = SceneColor{block.color.r / 255.0f, block.color.g / 255.0f, block.color.b / 255.0f, 1};
     SceneMaterial mat = SceneMaterial{blockAmbient, scaledDiff, blockSpecular, blockShininess};
     ScenePrimitive prim = ScenePrimitive{PrimitiveType::PRIMITIVE_CUBE, mat};
     glm::mat4 ctm = glm::mat4(1.f);
+    // Position blocks in the world; sink by y/2 because we're going to stretch by a factor of y
     ctm[3][0] = block.pos.x;
     ctm[3][1] = block.pos.y / 2;
     ctm[3][2] = block.pos.z;
+    // Lazy way to render ocean block (which is the only blue block): x and z get stretched out by render width
     if (block.color.b == 255) {
         ctm[0][0] = settings.renderWidth;
         ctm[1][1] = 1;
         ctm[2][2] = settings.renderWidth;
     } else {
+        // Every other block (which is part of the terrain) gets y stretched
         ctm[1][1] = block.pos.y;
     }
 
@@ -386,9 +374,6 @@ Shape genShapeFromBlock(const Block &block) {
     glm::mat3 inverseTransposeCTM = glm::transpose(glm::mat3(inverseCTM));
 
     RenderShapeData rsd = RenderShapeData{prim, ctm};
-
-    // generate vertexData
-//    cube.updateParams(2, rsd); // IGNORE SETTINGS; USE MINIMAL TESELLATION (its a cube - no difference)
 
     return Shape{rsd, inverseTransposeCTM};
 }
@@ -449,7 +434,6 @@ void Realtime::resizeGL(int w, int h) {
     glDeleteRenderbuffers(1, &m_fbo_renderbuffer);
     glDeleteFramebuffers(1, &m_fbo);
     // Tells OpenGL how big the screen is
-    //glViewport(0, 0, size().width() * m_devicePixelRatio, size().height() * m_devicePixelRatio);
     m_fbo_width = size().width() * m_devicePixelRatio;
     m_fbo_height = size().height() * m_devicePixelRatio;
     makeFBO();
@@ -475,30 +459,21 @@ void Realtime::genBlockData() {
         for (int z = 0; z < settings.renderWidth; z++) {
             int biomeID = m_biomeMap[z][x];
             int y = m_heightMap[z][x];
-            // render low points as water
+
             if (y == 0) {
-                //m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), SceneColor{0,0,255,1}});
+                // This is the ocean; we won't render any blocks and just render a single stretched-out ocean block
                 continue;
             }
             // set edges to a neighboring biome
             if (biomeID == -1 || biomeID == -10) biomeID = getNonEdgeNeighborID(x, z);
             SceneColor col = m_biomeColors[biomeID];
-            // start at top, generate blocks until lower than all surrounding blocks
-            //int lowestNeighbor = fmin(fmin(getHeight(x, z+1), getHeight(x, z-1)), fmin(getHeight(x-1,z), getHeight(x+1,z)));
+            // For now just place each block at its highest point (later the blocks will be lowered and stretched)
             m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
-//            if (y < lowestNeighbor) {
-//                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
-//            }
-//            while (y >= lowestNeighbor) {
-//                m_blockData.push_back(Block{glm::vec3(x-(float)settings.renderWidth/2.0, y, z-(float)settings.renderWidth/2.0), col});
-//                y--;
-//            }
         }
     }
 
-    m_blockData.push_back(Block{glm::vec3(0, -1, 0), SceneColor{0,0,255,1}}); // The ocean block is the last block
+    m_blockData.push_back(Block{glm::vec3(0, -1, 0), SceneColor{0,0,255,1}}); // The ocean block is the last block in the list
 
-    //fillTrackBlocks();
 }
 std::vector<glm::vec3> Realtime::createTrackPositions(glm::vec3 pos1, glm::vec3 pos2){
     std::vector<glm::vec3> returnVector;
@@ -517,62 +492,6 @@ std::vector<glm::vec3> Realtime::createTrackPositions(glm::vec3 pos1, glm::vec3 
     return returnVector;
 }
 
-//void Realtime::fillTrackBlocks(){
-//    int trackIncrements = settings.renderWidth/4;
-//    int trackWidth = settings.renderWidth - 2*(trackIncrements);
-//    trackLength = trackWidth*11;
-
-//    for (int i = 0; i < trackWidth; i++){
-//        int xPosMapSpace = i;
-//        int zPosMapSpace = 53;
-//        float yPos = (m_heightMap[xPosMapSpace][zPosMapSpace])+3;
-//        float xPos = (xPosMapSpace - (float)settings.renderWidth/2.0);
-//        float zPos = (zPosMapSpace - (float)settings.renderWidth/2.0);
-
-
-//        //std::cout << zPos  << std::endl;
-
-//        glm::vec3 addingTrackBlock = glm::vec3(xPos, yPos, zPos);
-
-
-
-//        trackBlocks.push_back(addingTrackBlock);
-
-
-//    }
-//    for(int i = 0; i < trackBlocks.size(); i++){
-//        std::vector<glm::vec3> trackPosList = createTrackPositions(trackBlocks[i], trackBlocks[i+1]);
-//        trackPos.push_back(trackPosList[0]);
-//        trackPos.push_back(trackPosList[1]);
-//        trackPos.push_back(trackPosList[2]);
-//        trackPos.push_back(trackPosList[3]);
-//        trackPos.push_back(trackPosList[4]);
-//        trackPos.push_back(trackPosList[5]);
-//        trackPos.push_back(trackPosList[6]);
-//        trackPos.push_back(trackPosList[7]);
-//        trackPos.push_back(trackPosList[8]);
-//        trackPos.push_back(trackPosList[9]);
-//        trackPos.push_back(trackPosList[10]);
-
-//    }
-
-//}
-
-//void Realtime::runTrack(){
-//    if(trackCounter > trackLength){
-//        trackCounter = 0;
-//    }
-
-
-//    m_sceneData.cameraData.pos[0] = trackPos[trackCounter][0];
-//    m_sceneData.cameraData.pos[1] = trackPos[trackCounter][1];
-//    m_sceneData.cameraData.pos[2] = trackPos[trackCounter][2];
-
-////    glm::vec4 newUpVector = glm::vec4(0.0f, 1.f, 0.f, 0.f);
-////    m_sceneData.cameraData.up = newUpVector;
-
-////    rebuildMatrices();
-//}
 
 void Realtime::walkMode(){
     settings.movementSpeed = 10;
@@ -580,10 +499,6 @@ void Realtime::walkMode(){
     int walkingZpos = (round(m_sceneData.cameraData.pos[2])+settings.renderWidth/2.0);
 
      m_sceneData.cameraData.pos[1] = m_heightMap[walkingZpos][walkingXpos] + 3.f;
-     //std::cout << m_heightMap[walkingXpos][walkingZpos] + 2.f;
-     //glm::vec4 newUpVector = glm::vec4(0.0f, 1.f, 0.f, 0.f);
-
-    // m_sceneData.cameraData.up = newUpVector;
 
      rebuildMatrices();
 }
@@ -833,7 +748,7 @@ void Realtime::computeBiomeTypes() {
     }
 }
 
-// WANT TO MODIFY DEFAULT SETTINGS??? DO SO HERE!!!
+// Default settings for scene modifiable here
 void Realtime::populateSceneData() {
     m_sceneData.cameraData.aperture = 0;
     m_sceneData.cameraData.focalLength = 0;
@@ -842,10 +757,6 @@ void Realtime::populateSceneData() {
     m_sceneData.cameraData.pos = glm::vec4(0, 50, 0, 1);
     m_sceneData.cameraData.look = glm::vec4(0, -1, 0, 0);
     m_sceneData.cameraData.up = glm::vec4(1, 0, 0, 0);
-    /*// SIDE VIEW
-//    m_sceneData.cameraData.pos = glm::vec4(255/2, 0, 255/2, 1);
-//    m_sceneData.cameraData.look = glm::vec4(1, 0, 0, 0);
-//    m_sceneData.cameraData.up = glm::vec4(0, 1, 0, 0);*/
 
     m_sceneData.globalData.ka = 0.2;
     m_sceneData.globalData.kd = 0.5;
@@ -859,7 +770,6 @@ void Realtime::populateSceneData() {
 }
 
 void Realtime::sceneChanged() {
-    //SceneParser::parse(settings.sceneFilePath, m_sceneData);
     populateSceneData();
     rebuildMatrices();
     //genTestBlockData();

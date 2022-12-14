@@ -21,9 +21,6 @@ void loadVectorAsCubemap(GLuint &textureId, std::vector<glm::vec4> mapData, int 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     Debug::glErrorCheck();
 
-
-
-
     for (int i = 0; i < 6; i++){
 
 
@@ -52,9 +49,6 @@ void loadVectorAsCubemap(GLuint &textureId, std::vector<glm::vec4> mapData, int 
     }
 
 }
-
-
-
 
 void Realtime::setupSkybox(){
     //Debug::glErrorCheck();
@@ -96,8 +90,6 @@ void Realtime::setupSkybox(){
         3, 6, 7,
         6, 3, 2
     };
-
-
 
     for(int i : skyboxIndices){
         m_verticiesVector.push_back(skyboxVertices[i*3]);
@@ -151,9 +143,6 @@ void Realtime::setupSkybox(){
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     Debug::glErrorCheck();
 
-
-
-
     for (int i = 0; i < 6; i++){
 
 //        QImage textureImage = QImage(facesCubemap[i]);
@@ -163,8 +152,6 @@ void Realtime::setupSkybox(){
 //        uchar* data = textureImage.bits();
 
         int TEXTURE_SIZE = 100;
-
-
 
         std::vector<glm::vec4> cloudmap{};
         cloudmap.reserve(TEXTURE_SIZE*TEXTURE_SIZE);
@@ -224,12 +211,7 @@ void Realtime::setupSkybox(){
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     Debug::glErrorCheck();
 
-
-
-
     for (int i = 0; i < 6; i++){
-
-
         int TEXTURE_SIZE = 1000;
 
         std::vector<glm::vec4> starmap{};

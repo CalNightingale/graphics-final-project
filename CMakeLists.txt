@@ -53,11 +53,8 @@ add_executable(${PROJECT_NAME}
     src/debug.h
     src/skybox.cpp
 
-
-    # voronoi files
     src/voronoi/src/jc_voronoi.h
 
-    # noise files
     src/noise/biome.cpp
     src/noise/biome.h
     src/noise/simplex.cpp
@@ -66,8 +63,6 @@ add_executable(${PROJECT_NAME}
     src/filters/filterutils.h
     src/filters/filterutils.cpp
     src/rgba.h
-
-
 )
 
 # GLM: this creates its library and allows you to `#include "glm/..."`

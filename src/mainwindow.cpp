@@ -65,19 +65,6 @@ void MainWindow::initialize() {
     toonCheck = new QCheckBox();
     toonCheck->setText(QStringLiteral("Toon ON:"));
     toonCheck->setChecked(false);
-//    // Create checkbox for per-pixel filter
-//    filter1 = new QCheckBox();
-//    filter1->setText(QStringLiteral("Per-Pixel Filter"));
-//    filter1->setChecked(false);
-
-//    // Create checkbox for kernel-based filter
-//    filter2 = new QCheckBox();
-//    filter2->setText(QStringLiteral("Kernel-Based Filter"));
-//    filter2->setChecked(false);
-
-//    // Create file uploader for scene file
-//    uploadFile = new QPushButton();
-//    uploadFile->setText(QStringLiteral("Upload Scene File"));
 
     // Creates the boxes containing the parameter sliders and number boxes
     QGroupBox *p1Layout = new QGroupBox(); // horizonal slider 1 alignment
@@ -192,73 +179,12 @@ void MainWindow::initialize() {
     l6->addWidget(p6Box);
     p6Layout->setLayout(l6);
 
-//    // Creates the boxes containing the camera sliders and number boxes
-//    QGroupBox *nearLayout = new QGroupBox(); // horizonal near slider alignment
-//    QHBoxLayout *lnear = new QHBoxLayout();
-//    QGroupBox *farLayout = new QGroupBox(); // horizonal far slider alignment
-//    QHBoxLayout *lfar = new QHBoxLayout();
-
-//    // Create slider controls to control near/far planes
-//    nearSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
-//    nearSlider->setTickInterval(1);
-//    nearSlider->setMinimum(1);
-//    nearSlider->setMaximum(1000);
-//    nearSlider->setValue(10);
-
-//    nearBox = new QDoubleSpinBox();
-//    nearBox->setMinimum(0.01f);
-//    nearBox->setMaximum(10.f);
-//    nearBox->setSingleStep(0.1f);
-//    nearBox->setValue(0.1f);
-
-//    farSlider = new QSlider(Qt::Orientation::Horizontal); // Far plane slider
-//    farSlider->setTickInterval(1);
-//    farSlider->setMinimum(1000);
-//    farSlider->setMaximum(10000);
-//    farSlider->setValue(10000);
-
-//    farBox = new QDoubleSpinBox();
-//    farBox->setMinimum(10.f);
-//    farBox->setMaximum(100.f);
-//    farBox->setSingleStep(0.1f);
-//    farBox->setValue(100.f);
-
-//    // Adds the slider and number box to the parameter layouts
-//    lnear->addWidget(nearSlider);
-//    lnear->addWidget(nearBox);
-//    nearLayout->setLayout(lnear);
-
-//    lfar->addWidget(farSlider);
-//    lfar->addWidget(farBox);
-//    farLayout->setLayout(lfar);
-
-//    // Extra Credit:
-//    ec1 = new QCheckBox();
-//    ec1->setText(QStringLiteral("Extra Credit 1"));
-//    ec1->setChecked(false);
-
-//    ec2 = new QCheckBox();
-//    ec2->setText(QStringLiteral("Extra Credit 2"));
-//    ec2->setChecked(false);
-
-//    ec3 = new QCheckBox();
-//    ec3->setText(QStringLiteral("Extra Credit 3"));
-//    ec3->setChecked(false);
-
-//    ec4 = new QCheckBox();
-//    ec4->setText(QStringLiteral("Extra Credit 4"));
-//    ec4->setChecked(false);
-
-//    vLayout->addWidget(uploadFile);
-//    vLayout->addWidget(tesselation_label);
     vLayout->addWidget(param1_label);
     vLayout->addWidget(p1Layout);
     vLayout->addWidget(param2_label);
     vLayout->addWidget(p2Layout);
     vLayout->addWidget(param3_label);
     vLayout->addWidget(p3Layout);
-//    vLayout->addWidget(param4_label);
-//    vLayout->addWidget(p4Layout);
     vLayout->addWidget(param5_label);
     vLayout->addWidget(p5Layout);
     vLayout->addWidget(toonShading_label);
@@ -267,20 +193,6 @@ void MainWindow::initialize() {
     vLayout->addWidget(marvelCheck);
     vLayout->addWidget(playerModeCheck);
     vLayout->addWidget(toonCheck);
-//    vLayout->addWidget(camera_label);
-//    vLayout->addWidget(near_label);
-//    vLayout->addWidget(nearLayout);
-//    vLayout->addWidget(far_label);
-//    vLayout->addWidget(farLayout);
-//    vLayout->addWidget(filters_label);
-//    vLayout->addWidget(filter1);
-//    vLayout->addWidget(filter2);
-    // Extra Credit:
-//    vLayout->addWidget(ec_label);
-//    vLayout->addWidget(ec1);
-//    vLayout->addWidget(ec2);
-//    vLayout->addWidget(ec3);
-//    vLayout->addWidget(ec4);
 
     connectUIElements();
 
@@ -288,13 +200,9 @@ void MainWindow::initialize() {
     onValChangeP1(0);
     onValChangeP2(1);
     onValChangeP3(100);
-//    onValChangeP4(128);
     onValChangeP5(2500);
     onValChangeToonSlider(3);
 
-    // Set default values for near and far planes
-//    onValChangeNearBox(0.1f);
-//    onValChangeFarBox(10.f);
 }
 
 void MainWindow::finish() {
@@ -303,17 +211,10 @@ void MainWindow::finish() {
 }
 
 void MainWindow::connectUIElements() {
-//    connectPerPixelFilter();
-//    connectKernelBasedFilter();
-//    connectUploadFile();
     connectParam1();
     connectParam2();
     connectParam3();
-//    connectParam4();
     connectParam5();
-//    connectNear();
-//    connectFar();
-//    connectExtraCredit();
     connectToon();
     connectMarvel();
 

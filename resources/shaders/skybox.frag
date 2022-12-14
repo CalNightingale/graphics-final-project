@@ -46,46 +46,6 @@ void main()
     vec3 fixedTexCoords = vec3(-texCoords.x, texCoords.y, -texCoords.z);
     float sunProx = dot(normalize(fixedTexCoords), normalize(vec3(lightPos)));
 
-
-
-
-
-
-//    if(texCoords.y == -1 ){
-//        FragColor = vec4(1,0,0,1);
-
-//    }
-
-//    if(texCoords.y == 1 ){
-//        FragColor = vec4(1,0,0,1);
-//    }
-
-//    if(texCoords.x == 1 ){
-//        FragColor = vec4(0,1,0,1);
-//    }
-
-
-//    if(texCoords.x == -1 ){
-//        FragColor = vec4(0,1,0,1);
-//    }
-
-
-//    if(texCoords.z == 1 ){
-//        FragColor = vec4(0,0,1,1);
-//    }
-
-
-//    if(texCoords.z == -1 ){
-//        FragColor = vec4(0,0,1,1);
-//    }
-
-
-//    if((uPix %2 == 1  && vPix %2 == 1) ||(uPix %2 == 0  && vPix %2 == 0) ){
-//        FragColor = vec4(1,1,1,1);
-//    } else {
-
-//        FragColor = skyColor;
-//    }
     bool showSun = sunProx > .99;
     if(showSun){
         FragColor = vec4(1,.5,0,1);
@@ -95,8 +55,6 @@ void main()
 
     vec4 cloudCol = texture(skybox, texCoords);
 
-
-//    FragColor = skyColor;
     if(time < 1000){
         if(cloudCol == vec4(0,0,0,1) && !showSun){
             FragColor += (1 - smoothstep(0, 1000, time)) * texture(starTexture, texCoords);
@@ -113,7 +71,4 @@ void main()
         FragColor += texture(skybox, texCoords);
 
     }
-
-
-
 }

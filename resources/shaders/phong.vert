@@ -17,9 +17,6 @@ uniform mat4 m_proj;
 
 void main() {
     // copy position and normal for shipping to frag shader
-//    worldPos = vec3(pos);
-//    worldNorm = vec3(norm);
-
     worldPos = vec3(model * vec4(pos, 1.0));
     worldNorm = vec3(vec4(it_model * norm,  0.0));
 
